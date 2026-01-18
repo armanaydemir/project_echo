@@ -1,0 +1,5 @@
+Activities are derived from logs.
+
+They should have a time, and a time when logged. 
+
+We need a nice view to see activity tracking over time.

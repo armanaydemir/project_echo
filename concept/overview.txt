@@ -1,0 +1,35 @@
+
+Project Echo
+
+Our goal is to create a personal assistant/organizor/planner revolving around you, and it all starts with the logs, then we add features that extract from there.
+
+Logs
+    - need to input from anywhere, as text
+    - logs need to be persisted purely, along with their time.
+    - everything downstream is processed from these 'logs'
+
+Realy, this input of the logs and timestamping it and keeping that is the whole app, EVERYTHING ELSE can be determined downstream from those. All edits to calenders, activities, etc, done through logs, it is the only input for this app. 
+
+Another principle is privacy, theres normal logs then 'personal' logs which are a seperate toggle to get to or see.
+
+Currently, activities, ideas, and events can be created down stream from logs, but nothing else. And nothing will be created from 'personal' logs.
+    - see activites.txt, ideas.txt, and events.txt
+
+Use cases:
+    - logging idea for projects
+    - logging activites (walking dogs)
+    - logging habits (brushing teeth, smoking)
+    - logging to do items
+
+Issues:
+    - logging activites and habits is hard because we have to log everytime, we need to add ability to add activities and habits in history, and try to do it automatically as much as possible.
+
+
+Ideas for future
+    - Perhaps everythign else surrouding the log idea, calendar, activities, etc are plugins/modifiers which can be modules to add icloud calendar or whatever you want.
+    - push notifications/automatic planning based on log
+    - calendar (gantt)
+    - ideas/projects/tasks
+    - blog based on log
+    - habit tracking
+    - automatic activity logging based on hooking in apis (git commits, apple exercise for walking dog)

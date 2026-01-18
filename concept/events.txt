@@ -1,0 +1,5 @@
+Events are calender events that are of particular interest to me. These can be derived from logs but also can be manually added.
+
+Need a nice view to see the events, in particular a gantt view would be good alongside a traditional calendar.
+
+These should be flexible, can have times or not, can be across dates, contiguous or not, can have location or not, etc.

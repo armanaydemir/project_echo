@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Echo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 20px;
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+    h1 { margin-bottom: 20px; }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border: 1px solid #444;
+      border-radius: 4px;
+      resize: vertical;
+      background: #2a2a2a;
+      color: #e0e0e0;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover { background: #555; }
+    #logs { margin-top: 30px; }
+    .log {
+      background: #2a2a2a;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      border: 1px solid #333;
+    }
+    .log-time {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 5px;
+    }
+    .log-content { white-space: pre-wrap; }
+    .form-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-top: 10px;
+    }
+    label { cursor: pointer; }
+    label.small { font-size: 12px; color: #888; margin-left: auto; }
+    .log.private { border-color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Project Echo</h1>
+
+  <form id="form">
+    <textarea id="content" placeholder="Enter your log..." required></textarea>
+    <div class="form-row">
+      <button type="submit">Submit</button>
+      <label><input type="checkbox" id="private"> Private</label>
+      <label class="small"><input type="checkbox" id="showPrivate"> Show private</label>
+    </div>
+  </form>
+
+  <div id="logs"></div>
+
+  <script>
+    const form = document.getElementById('form');
+    const content = document.getElementById('content');
+    const privateCheckbox = document.getElementById('private');
+    const showPrivateCheckbox = document.getElementById('showPrivate');
+    const logsDiv = document.getElementById('logs');
+
+    async function loadLogs() {
+      try {
+        const res = await fetch('/logs');
+        const logs = await res.json();
+        const showPrivate = showPrivateCheckbox.checked;
+        logsDiv.innerHTML = logs
+          .filter(log => showPrivate || !log.private)
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .map(log => `
+            <div class="log${log.private ? ' private' : ''}">
+              <div class="log-time">${formatTime(log.timestamp)}${log.private ? ' (private)' : ''}</div>
+              <div class="log-content">${escapeHtml(log.content)}</div>
+            </div>
+          `).join('');
+      } catch (e) {
+        logsDiv.innerHTML = '<p>Error loading logs</p>';
+      }
+    }
+
+    function formatTime(ts) {
+      return new Date(ts).toLocaleString();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = content.value.trim();
+      if (!text) return;
+
+      try {
+        await fetch('/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: text, private: privateCheckbox.checked })
+        });
+        content.value = '';
+        privateCheckbox.checked = false;
+        loadLogs();
+      } catch (e) {
+        alert('Error submitting log');
+      }
+    });
+
+    showPrivateCheckbox.addEventListener('change', loadLogs);
+
+    loadLogs();
+  </script>
+</body>
+</html>

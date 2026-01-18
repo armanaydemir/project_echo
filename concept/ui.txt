@@ -1,0 +1,12 @@
+UI Flow
+
+Website, single page.
+
+Top: text input box + submit button
+Below: list of previous logs with timestamps
+
+Logs stored in jsonl file.
+
+That's it for now.
+
+Have it be dark mode with clean/somewhat futuristic text but mainly built for legibility ease of use. 
