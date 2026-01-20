@@ -2,8 +2,8 @@ UI Flow
 
 Website, single page.
 
-Top: text input box + submit button
-Below: list of previous logs with timestamps
+Top: text input box + submit button + private toggle
+Below: list of previous logs with timestamps (hidden until you scroll past input)
 
 Logs stored in jsonl file.
 
