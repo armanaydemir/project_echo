@@ -1,0 +1,35 @@
+We 100% want to store the logs and host/run this app privately, and make it easily hostable for others privately as well.
+
+We would also like to have the AI processing of the logs be private eventually, but we haven't even implemented this yet at all yet.
+
+---
+
+## Current Implementation (Jan 2026)
+
+### Storage
+- Logs stored in local JSONL file (logs.jsonl)
+- File is gitignored to keep logs private
+- DATA_DIR environment variable configures location
+- Future: May migrate to SQLite for better querying
+
+### Deployment Options (see DEPLOYMENT.md)
+
+1. **Desktop PC + Cloudflare Tunnel** (recommended for personal use)
+   - Cost: $0/month + domain (~$12/year)
+   - Privacy: Excellent (data stays on your machine)
+   - Access: From anywhere via HTTPS
+   - Can run Ollama locally for LLM processing
+
+2. **Tailscale** (maximum privacy)
+   - Cost: $0
+   - Privacy: Maximum (no public exposure)
+   - Access: Only from your own devices with Tailscale
+
+3. **Docker self-hosting** (for servers/VPS)
+   - docker-compose up -d
+   - Data persisted in Docker volume
+
+### LLM Processing (planned)
+- Primary: Ollama running locally (private by default)
+- Optional: User-provided API keys for cloud LLMs
+- Processing happens on same machine as storage

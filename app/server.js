@@ -3,8 +3,14 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
-const LOGS_FILE = path.join(__dirname, 'logs.jsonl');
+const PORT = process.env.PORT || 3000;
+const DATA_DIR = process.env.DATA_DIR || __dirname;
+const LOGS_FILE = path.join(DATA_DIR, 'logs.jsonl');
+
+// Ensure data directory exists
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -35,6 +41,7 @@ app.get('/logs', (req, res) => {
   res.json(logs);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`);
+  console.log(`Data directory: ${DATA_DIR}`);
 });
