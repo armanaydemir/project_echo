@@ -1,196 +1,201 @@
 # Project Echo - Deployment Guide
 
-## Quick Start (Local Development)
+This branch (`cloudflare`) uses **Cloudflare Workers + D1** for serverless deployment.
+
+For the self-hosted version (Docker, local), see the `main` branch.
+
+---
+
+## Cloudflare Workers Deployment
+
+### What's Different in This Branch
+
+| Component | Main Branch | Cloudflare Branch |
+|-----------|-------------|-------------------|
+| Runtime | Node.js + Express | Cloudflare Workers |
+| Storage | JSONL file | D1 (SQLite) |
+| Hosting | Self-hosted | Cloudflare edge (global) |
+| Cost | Your server | Free tier (generous) |
+
+### Free Tier Limits
+
+- **Workers**: 100,000 requests/day
+- **D1 Reads**: 5 million/day
+- **D1 Writes**: 100,000/day
+- **D1 Storage**: 5 GB
+
+For personal use: **permanently free**.
+
+---
+
+## Quick Start
+
+### 1. Install Wrangler CLI
 
 ```bash
-cd app
+npm install -g wrangler
+```
+
+### 2. Login to Cloudflare
+
+```bash
+wrangler login
+```
+
+### 3. Create D1 Database
+
+```bash
+wrangler d1 create project-echo-db
+```
+
+Copy the `database_id` from the output and update `wrangler.toml`:
+
+```toml
+[[d1_databases]]
+binding = "DB"
+database_name = "project-echo-db"
+database_id = "YOUR_DATABASE_ID_HERE"
+```
+
+### 4. Run Database Migration
+
+```bash
+wrangler d1 execute project-echo-db --remote --file=./migrations/0001_create_logs.sql
+```
+
+### 5. Install Dependencies
+
+```bash
 npm install
-node server.js
 ```
 
-Open http://localhost:3000
+### 6. Local Development
+
+```bash
+npm run dev
+```
+
+Opens at http://localhost:8787
+
+### 7. Deploy to Production
+
+```bash
+npm run deploy
+```
+
+Your app is now live at `https://project-echo.<your-subdomain>.workers.dev`
 
 ---
 
-## Option 1: Docker (Recommended for Self-Hosting)
+## Custom Domain (Optional)
 
-### Run with Docker Compose
-
-```bash
-docker-compose up -d
-```
-
-Your data is stored in a Docker volume (`echo_data`).
-
-### Run with Docker directly
-
-```bash
-docker build -t project-echo .
-docker run -d -p 3000:3000 -v echo_data:/data project-echo
-```
+1. Go to Cloudflare dashboard → Workers & Pages → your worker
+2. Click "Custom Domains" tab
+3. Add your domain (must be on Cloudflare DNS)
 
 ---
 
-## Option 2: Desktop PC + Cloudflare Tunnel (Access from Anywhere)
+## Migrating Existing Data
 
-This lets you run Echo on your desktop/home server and access it securely from your phone or any device.
-
-### Prerequisites
-- A domain name (can get one for ~$10-15/year)
-- Free Cloudflare account
-- Your desktop running 24/7 (or whenever you want access)
-
-### Step 1: Add Domain to Cloudflare
-
-1. Sign up at https://cloudflare.com
-2. Add your domain and update nameservers at your registrar
-3. Wait for DNS propagation (usually a few minutes)
-
-### Step 2: Install cloudflared
-
-**macOS:**
-```bash
-brew install cloudflared
-```
-
-**Linux:**
-```bash
-curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
-chmod +x cloudflared
-sudo mv cloudflared /usr/local/bin/
-```
-
-**Windows:**
-Download from https://github.com/cloudflare/cloudflared/releases
-
-### Step 3: Login to Cloudflare
+If you have logs in `logs.jsonl` from the main branch:
 
 ```bash
-cloudflared tunnel login
-```
+# Generate SQL from JSONL
+node scripts/migrate-jsonl-to-d1.js ./path/to/logs.jsonl > migration-data.sql
 
-This opens a browser to authorize.
-
-### Step 4: Create a Tunnel
-
-```bash
-cloudflared tunnel create echo
-```
-
-Note the tunnel ID that's printed.
-
-### Step 5: Configure the Tunnel
-
-Create `~/.cloudflared/config.yml`:
-
-```yaml
-tunnel: <YOUR-TUNNEL-ID>
-credentials-file: /path/to/.cloudflared/<TUNNEL-ID>.json
-
-ingress:
-  - hostname: echo.yourdomain.com
-    service: http://localhost:3000
-  - service: http_status:404
-```
-
-### Step 6: Create DNS Record
-
-```bash
-cloudflared tunnel route dns echo echo.yourdomain.com
-```
-
-### Step 7: Start the Tunnel
-
-```bash
-# Start Project Echo
-cd /path/to/project_echo/app
-node server.js &
-
-# Start the tunnel
-cloudflared tunnel run echo
-```
-
-Now access your app at https://echo.yourdomain.com from anywhere!
-
-### Step 8: Run as Service (Optional)
-
-**macOS (launchd):**
-```bash
-sudo cloudflared service install
-```
-
-**Linux (systemd):**
-```bash
-sudo cloudflared service install
-sudo systemctl enable cloudflared
-sudo systemctl start cloudflared
+# Import to D1
+wrangler d1 execute project-echo-db --remote --file=./migration-data.sql
 ```
 
 ---
 
-## Option 3: Tailscale (Private Network Only)
+## For Others to Deploy Their Own Instance
 
-If you only need access from your own devices (most private option):
-
-### Step 1: Install Tailscale
-
-Install on your desktop and all devices: https://tailscale.com/download
-
-### Step 2: Run Project Echo
+1. Fork this repo
+2. Create free Cloudflare account at https://cloudflare.com
+3. Run:
 
 ```bash
-cd app
-node server.js
+npm install -g wrangler
+wrangler login
+wrangler d1 create project-echo-db
+# Update wrangler.toml with your database_id
+npm install
+wrangler d1 execute project-echo-db --remote --file=./migrations/0001_create_logs.sql
+npm run deploy
 ```
 
-### Step 3: Access via Tailscale IP
-
-Find your desktop's Tailscale IP (looks like `100.x.x.x`) and access:
-```
-http://100.x.x.x:3000
-```
-
-No public exposure, end-to-end encrypted.
+Done. Each person gets their own isolated database.
 
 ---
 
-## Adding Authentication (Cloudflare Access)
+## Adding Authentication
 
-Protect your tunnel with free authentication:
+Protect your app with Cloudflare Access (free):
 
 1. Go to Cloudflare Zero Trust dashboard
-2. Access > Applications > Add an application
+2. Access → Applications → Add application
 3. Choose "Self-hosted"
-4. Set application domain: `echo.yourdomain.com`
-5. Add authentication policy (email, Google, GitHub, etc.)
+4. Set domain: `project-echo.<subdomain>.workers.dev`
+5. Add policy: Allow emails ending in `@yourdomain.com` (or specific emails)
 
-Now users must authenticate before reaching your app.
-
----
-
-## Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `3000` | Server port |
-| `DATA_DIR` | `./` (app dir) | Where to store logs.jsonl |
+Now only authenticated users can access.
 
 ---
 
-## Data Location
+## Project Structure
 
-- **Local dev**: `app/logs.jsonl`
-- **Docker**: `/data/logs.jsonl` (in `echo_data` volume)
-- **Custom**: Set `DATA_DIR` environment variable
-
-### Backup Your Data
-
-**Docker:**
-```bash
-docker cp $(docker-compose ps -q echo):/data/logs.jsonl ./backup-logs.jsonl
+```
+project-echo/
+├── src/
+│   └── index.ts          # Worker code (no framework)
+├── public/
+│   └── index.html        # Frontend (same as main branch)
+├── migrations/
+│   └── 0001_create_logs.sql
+├── scripts/
+│   └── migrate-jsonl-to-d1.js
+├── wrangler.toml         # Cloudflare config
+├── package.json
+└── tsconfig.json
 ```
 
-**Direct:**
-```bash
-cp $DATA_DIR/logs.jsonl ./backup-logs.jsonl
+---
+
+## D1 Database Schema
+
+```sql
+CREATE TABLE logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  content TEXT NOT NULL,
+  is_private INTEGER DEFAULT 0,
+  created_at TEXT NOT NULL
+);
 ```
+
+Simple. One table, queryable with SQL.
+
+---
+
+## LLM Processing (Future)
+
+Since this runs serverless, local Ollama isn't possible. For LLM features:
+
+- Use cloud APIs (Anthropic, OpenAI, etc.)
+- Store API key as a secret: `wrangler secret put ANTHROPIC_API_KEY`
+- Access in code via `env.ANTHROPIC_API_KEY`
+
+**Recommended**: Anthropic Claude API (no training on API data, good privacy).
+
+---
+
+## Comparison: When to Use Which Branch
+
+| Use Case | Branch |
+|----------|--------|
+| Run on your own PC/server | `main` |
+| Access from phone without dedicated server | `cloudflare` |
+| Maximum privacy (data on your machine) | `main` + Cloudflare Tunnel |
+| Zero maintenance, global edge | `cloudflare` |
+| Run local Ollama for LLM | `main` |
+| Use cloud LLM APIs | Either (cloudflare easier) |

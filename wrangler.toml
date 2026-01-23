@@ -1,0 +1,13 @@
+name = "project-echo"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# Serve static assets from the public directory
+[assets]
+directory = "./public"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "project-echo-db"
+database_id = "YOUR_DATABASE_ID"  # Replace after running: wrangler d1 create project-echo-db

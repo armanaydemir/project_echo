@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Echo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+    }
+
+    .spacer {
+      height: 100vh;
+    }
+
+    .input-container {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 600px;
+      padding: 0 20px;
+      z-index: 100;
+    }
+
+    h1 {
+      font-weight: 200;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      resize: none;
+      background: rgba(255,255,255,0.03);
+      color: #e0e0e0;
+      font-size: 16px;
+      transition: border-color 0.3s, background 0.3s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #555;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-top: 12px;
+    }
+
+    button {
+      padding: 10px 25px;
+      background: linear-gradient(135deg, #333 0%, #222 100%);
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #444 0%, #333 100%);
+      border-color: #555;
+    }
+
+    label {
+      cursor: pointer;
+      font-size: 14px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    label:hover { opacity: 1; }
+
+    label.small {
+      font-size: 12px;
+      margin-left: auto;
+      opacity: 0.5;
+    }
+
+    .scroll-hint {
+      text-align: center;
+      opacity: 0.3;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+    }
+
+    .scroll-hint span {
+      display: inline-block;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(5px); }
+    }
+
+    #logs {
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 20px 50px;
+    }
+
+    .log {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 12px;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .log.show {
+      animation: fadeSlideIn 0.4s ease forwards;
+    }
+
+    .log.instant {
+      opacity: 1;
+      transform: none;
+    }
+
+    .log.private {
+      border-left: 2px solid #555;
+    }
+
+    @keyframes fadeSlideIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .log-time {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 8px;
+      font-family: monospace;
+    }
+
+    .log-content {
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    #logs.hidden {
+      visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div class="input-container" id="inputContainer">
+    <h1 id="title">Echo</h1>
+
+    <form id="form">
+      <textarea id="content" placeholder="What's on your mind..." required></textarea>
+      <div class="form-row">
+        <button type="submit">Log</button>
+        <label><input type="checkbox" id="private"> Private</label>
+        <label class="small"><input type="checkbox" id="showPrivate"> Show private</label>
+      </div>
+    </form>
+
+    <div class="scroll-hint" id="scrollHint"><span>↓</span></div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div id="logs" class="hidden"></div>
+
+  <script>
+    const form = document.getElementById('form');
+    const content = document.getElementById('content');
+    const privateCheckbox = document.getElementById('private');
+    const showPrivateCheckbox = document.getElementById('showPrivate');
+    const logsDiv = document.getElementById('logs');
+    const inputContainer = document.getElementById('inputContainer');
+    const title = document.getElementById('title');
+    const scrollHint = document.getElementById('scrollHint');
+    const textarea = document.querySelector('textarea');
+
+    let hasRevealed = false;
+
+    async function loadLogs(animate = true) {
+      try {
+        const res = await fetch('/logs');
+        const logs = await res.json();
+        const showPrivate = showPrivateCheckbox.checked;
+        const filtered = logs
+          .filter(log => showPrivate || !log.private)
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        logsDiv.innerHTML = filtered.map((log, i) => `
+          <div class="log ${animate ? '' : 'instant'}" data-index="${i}">
+            <div class="log-time">${formatTime(log.timestamp)}${log.private ? ' · private' : ''}</div>
+            <div class="log-content">${escapeHtml(log.content)}</div>
+          </div>
+        `).join('');
+
+        if (animate && hasRevealed) {
+          revealLogs();
+        } else if (!animate) {
+          document.querySelectorAll('.log').forEach(l => l.classList.add('instant'));
+        }
+      } catch (e) {
+        logsDiv.innerHTML = '<p style="opacity:0.5">Error loading logs</p>';
+      }
+    }
+
+    function revealLogs() {
+      document.querySelectorAll('.log').forEach((log, i) => {
+        setTimeout(() => {
+          log.classList.add('show');
+        }, i * 50);
+      });
+    }
+
+    function formatTime(ts) {
+      const d = new Date(ts);
+      return d.toLocaleDateString() + ' · ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = content.value.trim();
+      if (!text) return;
+
+      try {
+        await fetch('/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: text, private: privateCheckbox.checked })
+        });
+        content.value = '';
+        privateCheckbox.checked = false;
+        loadLogs(false);
+      } catch (e) {
+        alert('Error submitting log');
+      }
+    });
+
+    showPrivateCheckbox.addEventListener('change', () => loadLogs(false));
+
+    // Smooth scroll-based positioning
+    function updatePosition() {
+      const scrollY = window.scrollY;
+      const vh = window.innerHeight;
+      const maxScroll = vh * 0.6;
+
+      // Progress from 0 (top) to 1 (scrolled)
+      const progress = Math.min(scrollY / maxScroll, 1);
+
+      // Interpolate values
+      const startTop = vh * 0.5 - 120; // centered
+      const endTop = 30; // docked
+      const currentTop = startTop - (startTop - endTop) * progress;
+
+      const startFontSize = 2.5;
+      const endFontSize = 1;
+      const currentFontSize = startFontSize - (startFontSize - endFontSize) * progress;
+
+      const startHeight = 120;
+      const endHeight = 60;
+      const currentHeight = startHeight - (startHeight - endHeight) * progress;
+
+      const startMargin = 30;
+      const endMargin = 15;
+      const currentMargin = startMargin - (startMargin - endMargin) * progress;
+
+      const startHintMargin = 50;
+      const hintOpacity = 1 - progress * 3; // fade out quickly
+
+      inputContainer.style.top = currentTop + 'px';
+      title.style.fontSize = currentFontSize + 'rem';
+      title.style.marginBottom = currentMargin + 'px';
+      textarea.style.height = currentHeight + 'px';
+      scrollHint.style.opacity = Math.max(0, hintOpacity);
+      scrollHint.style.marginTop = (startHintMargin * (1 - progress)) + 'px';
+
+      // Show logs after threshold
+      if (progress > 0.3 && !hasRevealed) {
+        hasRevealed = true;
+        logsDiv.classList.remove('hidden');
+        revealLogs();
+      } else if (progress <= 0.1 && hasRevealed) {
+        hasRevealed = false;
+        logsDiv.classList.add('hidden');
+        document.querySelectorAll('.log').forEach(l => {
+          l.classList.remove('show');
+        });
+      }
+    }
+
+    window.addEventListener('scroll', updatePosition);
+    updatePosition();
+    loadLogs(true);
+  </script>
+</body>
+</html>
