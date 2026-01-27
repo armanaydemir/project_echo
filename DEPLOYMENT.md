@@ -5,10 +5,12 @@
 ```bash
 cd app
 npm install
-node server.js
+PORT=3001 node server.js
 ```
 
-Open http://localhost:3000
+Open http://localhost:3001
+
+> **Note:** Dev uses port 3001 to avoid conflicts with production (port 3000).
 
 ---
 
