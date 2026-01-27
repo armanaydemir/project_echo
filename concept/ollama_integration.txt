@@ -1,0 +1,24 @@
+Ollama Integration
+
+For now, we're keeping it simple - just test the integration by letting the user "chat" with their logs.
+
+How it works:
+    - User clicks a chat button or goes to a chat view
+    - We pass all their logs directly to the local Ollama LLM as context
+    - User can ask questions like "what did I do last week?" or "summarize my project ideas"
+    - LLM responds based on the log content
+
+This is intentionally basic to start. We're just testing that the Ollama connection works and that chatting with logs is useful at all.
+
+Privacy:
+    - Ollama runs locally, so logs never leave the machine
+    - This aligns with our privacy-first approach
+    - Personal logs should probably be excluded from chat context for now
+
+Future improvements:
+    - smarter context selection (don't pass ALL logs, just relevant ones)
+    - embeddings/vector search for better retrieval
+    - specific prompts for different tasks (summarize week, extract todos, etc)
+    - streaming responses
+
+But for now, just get it working end to end.
