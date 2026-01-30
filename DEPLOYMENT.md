@@ -170,12 +170,65 @@ Now users must authenticate before reaching your app.
 
 ---
 
+## Ollama Integration
+
+Project Echo can use Ollama for local LLM inference.
+
+### Prerequisites
+
+1. **Install Ollama**: Download from https://ollama.ai
+2. **Pull a model**:
+   ```bash
+   ollama pull llama3.2
+   ```
+3. **Ensure Ollama is running**:
+   ```bash
+   ollama serve
+   ```
+   Ollama runs on `http://localhost:11434` by default.
+
+### Configuration
+
+Set these environment variables to configure Ollama:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OLLAMA_HOST` | `http://localhost:11434` | Ollama API endpoint |
+| `OLLAMA_MODEL` | `llama3.2` | Model to use for inference |
+
+### Docker Note
+
+When running Project Echo in Docker, the container needs to reach Ollama running on the host machine.
+
+**macOS / Windows:**
+Docker Desktop automatically resolves `host.docker.internal` to the host machine. The `docker-compose.yml` is pre-configured with `OLLAMA_HOST=http://host.docker.internal:11434`.
+
+**Linux:**
+Linux requires the `extra_hosts` mapping to resolve `host.docker.internal`. This is included in the `docker-compose.yml`:
+
+```yaml
+extra_hosts:
+  - "host.docker.internal:host-gateway"
+```
+
+If running with `docker run` directly on Linux, add the flag:
+```bash
+docker run -d -p 3000:3000 --add-host=host.docker.internal:host-gateway \
+  -e OLLAMA_HOST=http://host.docker.internal:11434 \
+  -e OLLAMA_MODEL=llama3.2 \
+  -v echo_data:/data project-echo
+```
+
+---
+
 ## Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `3000` | Server port |
 | `DATA_DIR` | `./` (app dir) | Where to store logs.jsonl |
+| `OLLAMA_HOST` | `http://localhost:11434` | Ollama API endpoint |
+| `OLLAMA_MODEL` | `llama3.2` | Ollama model to use |
 
 ---
 

@@ -8,6 +8,10 @@ services:
     environment:
       - PORT=3000
       - DATA_DIR=/data
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - OLLAMA_MODEL=llama3.2
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
 volumes:
