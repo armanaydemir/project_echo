@@ -1,0 +1,28 @@
+Concept Document Style
+
+These are internal design notes, not polished docs.
+
+Format
+    - plain .txt files
+    - title on its own line, blank line, then content
+    - short paragraphs, 1-3 sentences max
+    - simple indentation with "    - " for nested lists
+    - sections separated by blank lines only, no headers
+
+Voice
+    - first person, conversational ("I", "we", "you")
+    - direct and to the point, no fluff
+    - imperfect spelling/grammar is fine
+    - acknowledge incompleteness naturally ("That's it for now", "planned")
+
+Content pattern
+    - start with what the thing IS (1 sentence)
+    - then what it NEEDS (brief list or sentence)
+    - then what VIEW/UI is desired (1 sentence)
+    - cross-reference other files when relevant ("see activities.txt")
+
+Philosophy
+    - everything flows from logs, logs are the only input
+    - privacy is a core principle
+    - future ideas listed simply as bullets
+    - state issues/problems honestly

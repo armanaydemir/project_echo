@@ -20,18 +20,12 @@
     .input-container {
       position: fixed;
       left: 50%;
-      transform: translateX(-50%);
       width: 100%;
       max-width: 600px;
       padding: 0 20px;
       z-index: 100;
-    }
-
-    h1 {
-      font-weight: 200;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      opacity: 0.9;
+      will-change: transform;
+      transform: translateX(-50%) translateY(var(--container-y, calc(50vh - 120px)));
     }
 
     textarea {
@@ -43,6 +37,7 @@
       background: rgba(255,255,255,0.03);
       color: #e0e0e0;
       font-size: 16px;
+      height: 100px;
       transition: border-color 0.3s, background 0.3s;
     }
 
@@ -92,9 +87,12 @@
 
     .scroll-hint {
       text-align: center;
-      opacity: 0.3;
+      opacity: var(--hint-opacity, 0.3);
       font-size: 12px;
       letter-spacing: 0.2em;
+      margin-top: 50px;
+      transform: translateY(var(--hint-y, 0px));
+      will-change: opacity, transform;
     }
 
     .scroll-hint span {
@@ -371,8 +369,6 @@
 </head>
 <body>
   <div class="input-container" id="inputContainer">
-    <h1 id="title">Echo</h1>
-
     <form id="form">
       <textarea id="content" placeholder="" required></textarea>
       <div class="form-row">
@@ -417,10 +413,6 @@
     const privateCheckbox = document.getElementById('private');
     const showPrivateCheckbox = document.getElementById('showPrivate');
     const logsDiv = document.getElementById('logs');
-    const inputContainer = document.getElementById('inputContainer');
-    const title = document.getElementById('title');
-    const scrollHint = document.getElementById('scrollHint');
-    const textarea = document.querySelector('textarea');
 
     let hasRevealed = false;
 
@@ -490,43 +482,50 @@
 
     showPrivateCheckbox.addEventListener('change', () => loadLogs(false));
 
-    // Smooth scroll-based positioning
+    // Smooth scroll-based positioning with RAF for 60fps
+    let ticking = false;
+    let lastProgress = -1;
+    const root = document.documentElement;
+
+    // Cache viewport height (update on resize)
+    let vh = window.innerHeight;
+    let maxScroll = vh * 0.6;
+    let startTop = vh * 0.5 - 120;
+    const endTop = 30;
+
+    function updateCachedValues() {
+      vh = window.innerHeight;
+      maxScroll = vh * 0.6;
+      startTop = vh * 0.5 - 120;
+    }
+
+    function lerp(start, end, t) {
+      return start + (end - start) * t;
+    }
+
     function updatePosition() {
       const scrollY = window.scrollY;
-      const vh = window.innerHeight;
-      const maxScroll = vh * 0.6;
-
-      // Progress from 0 (top) to 1 (scrolled)
       const progress = Math.min(scrollY / maxScroll, 1);
 
-      // Interpolate values
-      const startTop = vh * 0.5 - 120; // centered
-      const endTop = 30; // docked
-      const currentTop = startTop - (startTop - endTop) * progress;
+      // Skip if progress hasn't meaningfully changed (reduces redundant paints)
+      if (Math.abs(progress - lastProgress) < 0.001) {
+        ticking = false;
+        return;
+      }
+      lastProgress = progress;
 
-      const startFontSize = 2.5;
-      const endFontSize = 1;
-      const currentFontSize = startFontSize - (startFontSize - endFontSize) * progress;
+      // Batch all CSS custom property updates in one go (all GPU-accelerated)
+      const containerY = lerp(startTop, endTop, progress);
+      const hintOpacity = Math.max(0, 1 - progress * 3);
+      const hintY = -50 * progress; // move up as we scroll
 
-      const startHeight = 120;
-      const endHeight = 60;
-      const currentHeight = startHeight - (startHeight - endHeight) * progress;
+      root.style.cssText = `
+        --container-y: ${containerY}px;
+        --hint-opacity: ${hintOpacity};
+        --hint-y: ${hintY}px;
+      `;
 
-      const startMargin = 30;
-      const endMargin = 15;
-      const currentMargin = startMargin - (startMargin - endMargin) * progress;
-
-      const startHintMargin = 50;
-      const hintOpacity = 1 - progress * 3; // fade out quickly
-
-      inputContainer.style.top = currentTop + 'px';
-      title.style.fontSize = currentFontSize + 'rem';
-      title.style.marginBottom = currentMargin + 'px';
-      textarea.style.height = currentHeight + 'px';
-      scrollHint.style.opacity = Math.max(0, hintOpacity);
-      scrollHint.style.marginTop = (startHintMargin * (1 - progress)) + 'px';
-
-      // Show logs after threshold
+      // Show/hide logs (only when crossing thresholds)
       if (progress > 0.3 && !hasRevealed) {
         hasRevealed = true;
         logsDiv.classList.remove('hidden');
@@ -534,13 +533,25 @@
       } else if (progress <= 0.1 && hasRevealed) {
         hasRevealed = false;
         logsDiv.classList.add('hidden');
-        document.querySelectorAll('.log').forEach(l => {
-          l.classList.remove('show');
-        });
+        document.querySelectorAll('.log').forEach(l => l.classList.remove('show'));
+      }
+
+      ticking = false;
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(updatePosition);
+        ticking = true;
       }
     }
 
-    window.addEventListener('scroll', updatePosition);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', () => {
+      updateCachedValues();
+      onScroll();
+    }, { passive: true });
+
     updatePosition();
     loadLogs(true);
 
