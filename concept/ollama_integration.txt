@@ -7,6 +7,7 @@ How it works:
     - We pass all their logs directly to the local Ollama LLM as context
     - User can ask questions like "what did I do last week?" or "summarize my project ideas"
     - LLM responds based on the log content
+    - Responses stream in real-time via Server-Sent Events (SSE)
 
 This is intentionally basic to start. We're just testing that the Ollama connection works and that chatting with logs is useful at all.
 
@@ -19,6 +20,5 @@ Future improvements:
     - smarter context selection (don't pass ALL logs, just relevant ones)
     - embeddings/vector search for better retrieval
     - specific prompts for different tasks (summarize week, extract todos, etc)
-    - streaming responses
 
 But for now, just get it working end to end.
