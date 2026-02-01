@@ -29,7 +29,8 @@ We would also like to have the AI processing of the logs be private eventually, 
    - docker-compose up -d
    - Data persisted in Docker volume
 
-### LLM Processing (planned)
+### LLM Processing (see ollama_integration.txt)
 - Primary: Ollama running locally (private by default)
+- Starting simple: chat with your logs by passing them as context
 - Optional: User-provided API keys for cloud LLMs
 - Processing happens on same machine as storage
