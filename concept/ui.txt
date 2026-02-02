@@ -1,12 +1,26 @@
 UI Flow
 
-Website, single page.
+Website, multi-page.
 
-Top: text input box + submit button + private toggle
-Below: list of previous logs with timestamps (hidden until you scroll past input)
+Pages:
+    1. Home (main input page)
+    2. Logs Table (view/edit/search all logs)
 
-Logs stored in jsonl file.
+Home Page
+    - Top: text input box + submit button + private toggle
+    - Below: list of recent logs with timestamps (hidden until you scroll past input)
+    - Navigation link to Logs Table page
 
-That's it for now.
+Logs Table Page
+    - Full table view of all logs
+    - Search and filter capabilities
+    - Edit logs inline (preserves full version history)
+    - See logs_table.txt for details
 
-Have it be dark mode with clean/somewhat futuristic text but mainly built for legibility ease of use. 
+Style
+    - Dark mode with clean/somewhat futuristic text
+    - Built for legibility and ease of use
+
+Storage
+    - Logs stored in JSONL file with embedded version history
+    - See logs.txt for data structure 

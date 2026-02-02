@@ -1,0 +1,21 @@
+Logs
+
+The core of Project Echo. Logs are the single input mechanism - everything else is derived from them.
+
+Need to input from anywhere, as text. Logs are persisted purely, along with their timestamp. All edits to calendars, activities, etc are done through logs. Privacy is key - normal logs vs 'personal' logs with a separate toggle.
+
+Use cases: logging ideas for projects, activities (walking dogs), habits (brushing teeth, smoking), to do items.
+
+Editing and version history
+
+When a log is edited, we keep everything:
+    - original timestamp never changes
+    - original text is preserved
+    - every edit saves the old text with when it was valid
+    - current text and when it was last updated
+
+Even if you edit multiple times, we keep every version along the way. Think of it like git history for each log entry.
+
+See logs_table.txt for the editing interface.
+
+Nothing is created from 'personal' logs.

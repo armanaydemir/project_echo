@@ -1,5 +1,0 @@
-"Ideas" are the first object derived from the Logs. 
-
-Basically, I have different ideas from projects or just general insights, in my logs I can describe a new idea or I can add to an existing idea.
-
-We need a nice view to layout all our ideas, and see all logs related to it.

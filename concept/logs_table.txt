@@ -1,0 +1,28 @@
+Logs Table Page
+
+A dedicated page for viewing, searching, editing, and managing all logs.
+
+Layout
+    - header with navigation back to main page
+    - search/filter bar at top
+    - table showing timestamp, content, edited indicator, private indicator
+    - pagination or infinite scroll for large datasets
+
+Features
+    - search logs by text content
+    - filter by date range, private/public, edited/unedited
+    - sort by timestamp or last edited
+    - click row to expand full content if truncated
+
+Editing
+
+Inline edit mode for log content. All edits preserve complete version history - original timestamp never changes, original text always preserved, every edit tracked with when it happened.
+
+Show edit count on edited logs. "View history" option to see all previous versions with timestamps.
+    - see logs.txt for more on versioning
+
+Future ideas
+    - delete logs (soft delete? keep in history?)
+    - export logs (json, csv)
+    - bulk selection and actions
+    - diff view between versions
