@@ -6,6 +6,10 @@ Need to input from anywhere, as text. Logs are persisted purely, along with thei
 
 Use cases: logging ideas for projects, activities (walking dogs), habits (brushing teeth, smoking), to do items.
 
+Tags
+
+Every log has tags - labels to organize and categorize. New logs start with "needs review" tag. You review logs, add relevant tags, remove "needs review". See tags.txt for full details.
+
 Editing and version history
 
 When a log is edited, we keep everything:

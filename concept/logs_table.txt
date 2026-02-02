@@ -4,15 +4,23 @@ A dedicated page for viewing, searching, editing, and managing all logs.
 
 Layout
     - header with navigation back to main page
-    - search/filter bar at top
-    - table showing timestamp, content, edited indicator, private indicator
+    - search/filter bar at top (includes tag filter dropdown)
+    - table showing timestamp, content, tags, edited indicator, private indicator
     - pagination or infinite scroll for large datasets
 
 Features
     - search logs by text content
-    - filter by date range, private/public, edited/unedited
+    - filter by date range, private/public, edited/unedited, tags
     - sort by timestamp or last edited
     - click row to expand full content if truncated
+
+Tagging (see tags.txt)
+    - each row shows tag chips (small colored labels)
+    - "needs review" tag highlighted in yellow
+    - two action buttons per row: "review" and "+ tag"
+    - review button: opens quick-tag modal, auto-removes "needs review" on save
+    - "+ tag" button: add tags without full review flow
+    - tag chips are clickable to filter by that tag
 
 Editing
 

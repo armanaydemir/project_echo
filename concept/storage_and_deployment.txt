@@ -10,6 +10,8 @@ We would also like to have the AI processing of the logs be private eventually, 
 - Logs stored in local JSONL file (logs.jsonl)
 - File is gitignored to keep logs private
 - DATA_DIR environment variable configures location
+- Each log entry includes tags array (see tags.txt)
+- Separate tags.json tracks all known tags for autocomplete
 - Future: May migrate to SQLite for better querying
 
 ### Deployment Options (see DEPLOYMENT.md)

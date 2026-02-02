@@ -1,0 +1,27 @@
+Tags
+
+Tags are labels you attach to logs to organize and categorize them. Inspired by Copilot Money's transaction tagging - flexible, manual at first, smart later.
+
+Every log starts with one tag: "needs review". This is how we know what's been processed and what hasn't. You review a log, decide what tags apply, then remove "needs review".
+
+Tags are freeform text, no hierarchy. A log can have multiple tags. Examples: "work", "health", "idea", "todo", "dog walk", "project-echo".
+
+Storage
+    - tags stored as array on each log entry
+    - separate tags list tracks all known tags (for autocomplete)
+    - see storage_and_deployment.txt
+
+UI in logs table
+    - each row shows tag chips next to content
+    - "needs review" highlighted differently (yellow?)
+    - two buttons per row: "review" and "add tag"
+    - review button opens quick-tag modal, removes "needs review" when done
+    - filter logs by tag in the filter bar
+    - see logs_table.txt
+
+Future ideas
+    - auto-suggest tags based on log content (LLM)
+    - rules: "logs containing 'walked' auto-tag as 'dog walk'"
+    - tag management page (rename, merge, delete tags)
+    - tag colors/icons
+    - smart tags that update automatically (like "this week")

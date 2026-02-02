@@ -6,6 +6,7 @@ Our goal is to create a personal assistant/organizor/planner revolving around yo
 Logs are the single input mechanism - everything else is derived from them.
     - see logs.txt for details on log structure and versioning
     - see logs_table.txt for the logs viewing/editing interface
+    - see tags.txt for organizing logs with tags
 
 Issues:
     - logging activities and habits is hard because we have to log every time, we need to add ability to add activities and habits in history, and try to do it automatically as much as possible.
