@@ -154,6 +154,55 @@
       line-height: 1.5;
     }
 
+    .log-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #888;
+    }
+
+    .tag.needs-review {
+      background: rgba(234, 179, 8, 0.2);
+      color: #eab308;
+    }
+
+    .nav-link {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      display: flex;
+      gap: 16px;
+      z-index: 101;
+    }
+
+    .nav-link a {
+      color: #666;
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+
+    .nav-link a:hover {
+      color: #e0e0e0;
+    }
+
+    .needs-review-badge {
+      background: rgba(234, 179, 8, 0.2);
+      color: #eab308;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+    }
+
     #logs.hidden {
       visibility: hidden;
     }
@@ -161,6 +210,12 @@
   </style>
 </head>
 <body>
+  <div class="nav-link">
+    <span class="needs-review-badge" id="needsReviewBadge" style="display: none;">0 need review</span>
+    <a href="/logs-table">Logs Table</a>
+    <a href="/chat">Chat</a>
+  </div>
+
   <div class="input-container" id="inputContainer">
     <form id="form">
       <textarea id="content" placeholder="" required></textarea>
@@ -196,12 +251,28 @@
           .filter(log => showPrivate || !log.private)
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-        logsDiv.innerHTML = filtered.map((log, i) => `
-          <div class="log ${animate ? '' : 'instant'}" data-index="${i}">
-            <div class="log-time">${formatTime(log.timestamp)}${log.private ? ' · private' : ''}</div>
-            <div class="log-content">${escapeHtml(log.content)}</div>
-          </div>
-        `).join('');
+        // Update needs review badge
+        const needsReviewCount = logs.filter(log => log.tags && log.tags.includes('needs review')).length;
+        const badge = document.getElementById('needsReviewBadge');
+        if (needsReviewCount > 0) {
+          badge.textContent = `${needsReviewCount} need review`;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+
+        logsDiv.innerHTML = filtered.map((log, i) => {
+          const tags = (log.tags || []).map(tag =>
+            `<span class="tag ${tag === 'needs review' ? 'needs-review' : ''}">${escapeHtml(tag)}</span>`
+          ).join('');
+          return `
+            <div class="log ${animate ? '' : 'instant'}${log.private ? ' private' : ''}" data-index="${i}">
+              <div class="log-time">${formatTime(log.timestamp)}${log.private ? ' · private' : ''}</div>
+              <div class="log-content">${escapeHtml(log.content)}</div>
+              ${tags ? `<div class="log-tags">${tags}</div>` : ''}
+            </div>
+          `;
+        }).join('');
 
         if (animate && hasRevealed) {
           revealLogs();

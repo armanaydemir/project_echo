@@ -2,6 +2,7 @@ node_modules/
 
 # Data files - keep private, don't commit logs
 *.jsonl
+tags.json
 data/
 
 # Environment

@@ -133,11 +133,19 @@ docker run -d -p 3000:3000 --add-host=host.docker.internal:host-gateway \
 
 ## Data Location
 
-- **Local dev**: `app/logs.jsonl`
+- **Local dev**: `app/logs.jsonl` and `app/tags.json`
 - **Custom**: Set `DATA_DIR` environment variable
+
+### Data Files
+
+| File | Description |
+|------|-------------|
+| `logs.jsonl` | All log entries with content, tags, timestamps, and version history |
+| `tags.json` | Known tags list for autocomplete |
 
 ### Backup Your Data
 
 ```bash
 cp app/logs.jsonl ./backup-logs.jsonl
+cp app/tags.json ./backup-tags.json
 ```

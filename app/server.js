@@ -6,7 +6,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || __dirname;
 const LOGS_FILE = path.join(DATA_DIR, 'logs.jsonl');
+const TAGS_FILE = path.join(DATA_DIR, 'tags.json');
 const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
+
+// Default tag for new logs
+const DEFAULT_TAG = 'needs review';
 
 // Available models (add new models here)
 const MODELS = {
@@ -39,8 +43,18 @@ app.get('/all', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'all.html'));
 });
 
-// Helper function to get non-private logs
-function getNonPrivateLogs() {
+// Serve logs table page at /logs-table
+app.get('/logs-table', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'logs-table.html'));
+});
+
+// Generate unique ID for logs
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+}
+
+// Read all logs from file
+function readLogs() {
   if (!fs.existsSync(LOGS_FILE)) {
     return [];
   }
@@ -49,7 +63,67 @@ function getNonPrivateLogs() {
     .trim()
     .split('\n')
     .filter(line => line)
-    .map(line => JSON.parse(line))
+    .map(line => JSON.parse(line));
+}
+
+// Write all logs to file
+function writeLogs(logs) {
+  const data = logs.map(log => JSON.stringify(log)).join('\n') + '\n';
+  fs.writeFileSync(LOGS_FILE, data);
+}
+
+// Read known tags from file
+function readTags() {
+  if (!fs.existsSync(TAGS_FILE)) {
+    return [DEFAULT_TAG];
+  }
+  try {
+    const data = JSON.parse(fs.readFileSync(TAGS_FILE, 'utf8'));
+    return data.tags || [DEFAULT_TAG];
+  } catch (e) {
+    return [DEFAULT_TAG];
+  }
+}
+
+// Write known tags to file
+function writeTags(tags) {
+  fs.writeFileSync(TAGS_FILE, JSON.stringify({ tags }, null, 2));
+}
+
+// Add new tags to known tags list
+function addKnownTags(newTags) {
+  const knownTags = readTags();
+  const updated = [...new Set([...knownTags, ...newTags])];
+  writeTags(updated);
+  return updated;
+}
+
+// Migrate old logs without ID or tags
+function migrateLogs(logs) {
+  let needsWrite = false;
+  const migrated = logs.map(log => {
+    let changed = false;
+    if (!log.id) {
+      log.id = generateId();
+      changed = true;
+    }
+    if (!log.tags) {
+      log.tags = [DEFAULT_TAG];
+      changed = true;
+    }
+    if (changed) needsWrite = true;
+    return log;
+  });
+  if (needsWrite) {
+    writeLogs(migrated);
+  }
+  return migrated;
+}
+
+// Helper function to get non-private logs
+function getNonPrivateLogs() {
+  const logs = readLogs();
+  return logs
     .filter(log => !log.private)
     .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 }
@@ -71,28 +145,92 @@ function formatLogsAsContext(logs) {
 
 // POST /logs - Save a log entry
 app.post('/logs', (req, res) => {
-  const { content, private: isPrivate } = req.body;
+  const { content, private: isPrivate, tags } = req.body;
   const entry = {
+    id: generateId(),
     content,
     private: !!isPrivate,
+    tags: tags && tags.length > 0 ? tags : [DEFAULT_TAG],
     timestamp: new Date().toISOString()
   };
   fs.appendFileSync(LOGS_FILE, JSON.stringify(entry) + '\n');
+  // Track any new tags
+  if (entry.tags.length > 0) {
+    addKnownTags(entry.tags);
+  }
   res.json(entry);
 });
 
 // GET /logs - Return all logs
 app.get('/logs', (req, res) => {
-  if (!fs.existsSync(LOGS_FILE)) {
-    return res.json([]);
+  const logs = readLogs();
+  // Migrate old logs without ID/tags
+  const migrated = migrateLogs(logs);
+  res.json(migrated);
+});
+
+// PUT /logs/:id - Update a log entry (tags, content, private)
+app.put('/logs/:id', (req, res) => {
+  const { id } = req.params;
+  const { content, private: isPrivate, tags } = req.body;
+
+  const logs = readLogs();
+  const index = logs.findIndex(log => log.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Log not found' });
   }
-  const data = fs.readFileSync(LOGS_FILE, 'utf8');
-  const logs = data
-    .trim()
-    .split('\n')
-    .filter(line => line)
-    .map(line => JSON.parse(line));
-  res.json(logs);
+
+  const log = logs[index];
+
+  // Track version history if content changed
+  if (content !== undefined && content !== log.content) {
+    if (!log.versions) {
+      log.versions = [];
+    }
+    log.versions.push({
+      content: log.content,
+      editedAt: log.editedAt || log.timestamp
+    });
+    log.content = content;
+    log.editedAt = new Date().toISOString();
+  }
+
+  // Update tags
+  if (tags !== undefined) {
+    log.tags = tags;
+    addKnownTags(tags);
+  }
+
+  // Update private status
+  if (isPrivate !== undefined) {
+    log.private = !!isPrivate;
+  }
+
+  logs[index] = log;
+  writeLogs(logs);
+
+  res.json(log);
+});
+
+// GET /api/tags - Get all known tags for autocomplete
+app.get('/api/tags', (req, res) => {
+  const tags = readTags();
+  res.json({ tags });
+});
+
+// POST /api/tags - Add a new tag
+app.post('/api/tags', (req, res) => {
+  const { tag } = req.body;
+  if (!tag || typeof tag !== 'string') {
+    return res.status(400).json({ error: 'Tag is required' });
+  }
+  const trimmed = tag.trim().toLowerCase();
+  if (!trimmed) {
+    return res.status(400).json({ error: 'Tag cannot be empty' });
+  }
+  const tags = addKnownTags([trimmed]);
+  res.json({ tags });
 });
 
 // GET /api/models - List available models from Ollama

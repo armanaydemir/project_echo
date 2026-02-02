@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logs Table - Project Echo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid #222;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 {
+      font-weight: 400;
+      font-size: 16px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    .header-nav {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .header a {
+      color: #666;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .header a:hover {
+      color: #e0e0e0;
+    }
+
+    .needs-review-badge {
+      background: rgba(234, 179, 8, 0.2);
+      color: #eab308;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .filter-bar {
+      padding: 16px 24px;
+      background: rgba(255, 255, 255, 0.01);
+      border-bottom: 1px solid #222;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 14px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      color: #e0e0e0;
+      font-size: 14px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #555;
+    }
+
+    .filter-select {
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: #555;
+    }
+
+    .table-container {
+      padding: 0 24px 24px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #666;
+      border-bottom: 1px solid #333;
+      font-weight: 500;
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #1a1a1a;
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .col-timestamp {
+      width: 140px;
+      white-space: nowrap;
+    }
+
+    .col-content {
+      min-width: 300px;
+    }
+
+    .col-tags {
+      width: 200px;
+    }
+
+    .col-status {
+      width: 100px;
+    }
+
+    .col-actions {
+      width: 160px;
+      white-space: nowrap;
+    }
+
+    .timestamp {
+      font-family: monospace;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .content-text {
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .content-truncated {
+      max-height: 60px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .content-truncated::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 20px;
+      background: linear-gradient(transparent, #0a0a0a);
+    }
+
+    .content-expanded {
+      max-height: none;
+    }
+
+    .content-expanded::after {
+      display: none;
+    }
+
+    .expand-btn {
+      font-size: 11px;
+      color: #666;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 0;
+      margin-top: 4px;
+    }
+
+    .expand-btn:hover {
+      color: #e0e0e0;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #aaa;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tag:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .tag.needs-review {
+      background: rgba(234, 179, 8, 0.2);
+      color: #eab308;
+    }
+
+    .tag .remove-tag {
+      margin-left: 6px;
+      opacity: 0.5;
+      font-size: 14px;
+    }
+
+    .tag .remove-tag:hover {
+      opacity: 1;
+    }
+
+    .status-indicators {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .indicator {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .indicator.private {
+      color: #8b5cf6;
+    }
+
+    .indicator.edited {
+      color: #3b82f6;
+      cursor: pointer;
+    }
+
+    .indicator.edited:hover {
+      text-decoration: underline;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid #333;
+      background: rgba(255, 255, 255, 0.03);
+      color: #e0e0e0;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #444;
+    }
+
+    .btn-review {
+      background: rgba(234, 179, 8, 0.15);
+      border-color: rgba(234, 179, 8, 0.3);
+      color: #eab308;
+    }
+
+    .btn-review:hover {
+      background: rgba(234, 179, 8, 0.25);
+    }
+
+    .btn-edit {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: #3b82f6;
+    }
+
+    .btn-edit:hover {
+      background: rgba(59, 130, 246, 0.25);
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: #151515;
+      border: 1px solid #333;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #222;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: #e0e0e0;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-footer {
+      padding: 16px 20px;
+      border-top: 1px solid #222;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .log-preview {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .log-preview-time {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 8px;
+      font-family: monospace;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tag-input-container {
+      position: relative;
+    }
+
+    .tag-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      color: #e0e0e0;
+      font-size: 14px;
+    }
+
+    .tag-input:focus {
+      outline: none;
+      border-color: #555;
+    }
+
+    .tag-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      margin-top: 4px;
+      max-height: 150px;
+      overflow-y: auto;
+      z-index: 10;
+      display: none;
+    }
+
+    .tag-suggestions.active {
+      display: block;
+    }
+
+    .tag-suggestion {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .tag-suggestion:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .selected-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .selected-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #e0e0e0;
+    }
+
+    .selected-tag.needs-review {
+      background: rgba(234, 179, 8, 0.2);
+      color: #eab308;
+    }
+
+    .selected-tag button {
+      background: none;
+      border: none;
+      color: inherit;
+      margin-left: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      opacity: 0.7;
+    }
+
+    .selected-tag button:hover {
+      opacity: 1;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #333 0%, #222 100%);
+      color: #fff;
+      border: 1px solid #444;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #444 0%, #333 100%);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #888;
+      border: 1px solid #333;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn-secondary:hover {
+      color: #e0e0e0;
+      border-color: #444;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    .empty-state h3 {
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+
+    /* Version history modal */
+    .version-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .version-item {
+      padding: 12px;
+      border-bottom: 1px solid #222;
+    }
+
+    .version-item:last-child {
+      border-bottom: none;
+    }
+
+    .version-meta {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 8px;
+      font-family: monospace;
+    }
+
+    .version-content {
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      color: #aaa;
+    }
+
+    .version-current {
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: 8px;
+    }
+
+    .version-current .version-meta::after {
+      content: ' (current)';
+      color: #3b82f6;
+    }
+
+    /* Edit modal */
+    .edit-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      color: #e0e0e0;
+      font-size: 14px;
+      resize: vertical;
+      font-family: inherit;
+      line-height: 1.5;
+    }
+
+    .edit-textarea:focus {
+      outline: none;
+      border-color: #555;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox-group input {
+      width: 16px;
+      height: 16px;
+    }
+
+    .checkbox-group label {
+      margin: 0;
+      text-transform: none;
+      font-size: 14px;
+      color: #e0e0e0;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+    }
+
+    .pagination button {
+      padding: 8px 16px;
+    }
+
+    .pagination span {
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Logs Table</h1>
+    <div class="header-nav">
+      <span class="needs-review-badge" id="needsReviewCount">0 need review</span>
+      <a href="/">Home</a>
+      <a href="/chat">Chat</a>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search logs...">
+    <select class="filter-select" id="tagFilter">
+      <option value="">All tags</option>
+      <option value="needs review">Needs review</option>
+    </select>
+    <select class="filter-select" id="privateFilter">
+      <option value="">All logs</option>
+      <option value="public">Public only</option>
+      <option value="private">Private only</option>
+    </select>
+    <select class="filter-select" id="sortSelect">
+      <option value="newest">Newest first</option>
+      <option value="oldest">Oldest first</option>
+      <option value="edited">Recently edited</option>
+    </select>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-timestamp">Timestamp</th>
+          <th class="col-content">Content</th>
+          <th class="col-tags">Tags</th>
+          <th class="col-status">Status</th>
+          <th class="col-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="logsTableBody">
+      </tbody>
+    </table>
+
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <h3>No logs found</h3>
+      <p>Try adjusting your filters or create some logs first.</p>
+    </div>
+  </div>
+
+  <div class="pagination" id="pagination" style="display: none;">
+    <button class="btn" id="prevBtn">Previous</button>
+    <span id="pageInfo">Page 1 of 1</span>
+    <button class="btn" id="nextBtn">Next</button>
+  </div>
+
+  <!-- Review Modal -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Review Log</h2>
+        <button class="modal-close" onclick="closeModal('reviewModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="log-preview-time" id="reviewLogTime"></div>
+        <div class="log-preview" id="reviewLogContent"></div>
+
+        <div class="form-group">
+          <label>Add Tags</label>
+          <div class="tag-input-container">
+            <input type="text" class="tag-input" id="reviewTagInput" placeholder="Type a tag and press Enter...">
+            <div class="tag-suggestions" id="reviewTagSuggestions"></div>
+          </div>
+          <div class="selected-tags" id="reviewSelectedTags"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('reviewModal')">Cancel</button>
+        <button class="btn-primary" id="saveReviewBtn">Save & Mark Reviewed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Tag Modal -->
+  <div class="modal-overlay" id="addTagModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Add Tags</h2>
+        <button class="modal-close" onclick="closeModal('addTagModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="log-preview-time" id="addTagLogTime"></div>
+        <div class="log-preview" id="addTagLogContent"></div>
+
+        <div class="form-group">
+          <label>Current Tags</label>
+          <div class="selected-tags" id="addTagCurrentTags"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Add New Tag</label>
+          <div class="tag-input-container">
+            <input type="text" class="tag-input" id="addTagInput" placeholder="Type a tag and press Enter...">
+            <div class="tag-suggestions" id="addTagSuggestions"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('addTagModal')">Cancel</button>
+        <button class="btn-primary" id="saveAddTagBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Edit Log</h2>
+        <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Content</label>
+          <textarea class="edit-textarea" id="editContent"></textarea>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="editPrivate">
+            <label for="editPrivate">Private log</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tags</label>
+          <div class="tag-input-container">
+            <input type="text" class="tag-input" id="editTagInput" placeholder="Type a tag and press Enter...">
+            <div class="tag-suggestions" id="editTagSuggestions"></div>
+          </div>
+          <div class="selected-tags" id="editSelectedTags"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('editModal')">Cancel</button>
+        <button class="btn-primary" id="saveEditBtn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version History Modal -->
+  <div class="modal-overlay" id="historyModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Version History</h2>
+        <button class="modal-close" onclick="closeModal('historyModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="version-list" id="versionList"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('historyModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let allLogs = [];
+    let filteredLogs = [];
+    let knownTags = [];
+    let currentPage = 1;
+    const pageSize = 20;
+    let currentEditLog = null;
+
+    // Elements
+    const logsTableBody = document.getElementById('logsTableBody');
+    const emptyState = document.getElementById('emptyState');
+    const needsReviewCount = document.getElementById('needsReviewCount');
+    const searchInput = document.getElementById('searchInput');
+    const tagFilter = document.getElementById('tagFilter');
+    const privateFilter = document.getElementById('privateFilter');
+    const sortSelect = document.getElementById('sortSelect');
+
+    // Load data
+    async function loadLogs() {
+      try {
+        const res = await fetch('/logs');
+        allLogs = await res.json();
+        applyFilters();
+        updateNeedsReviewCount();
+      } catch (e) {
+        console.error('Failed to load logs:', e);
+      }
+    }
+
+    async function loadTags() {
+      try {
+        const res = await fetch('/api/tags');
+        const data = await res.json();
+        knownTags = data.tags || [];
+        updateTagFilterOptions();
+      } catch (e) {
+        console.error('Failed to load tags:', e);
+      }
+    }
+
+    function updateTagFilterOptions() {
+      const currentValue = tagFilter.value;
+      tagFilter.innerHTML = '<option value="">All tags</option>';
+      knownTags.forEach(tag => {
+        const option = document.createElement('option');
+        option.value = tag;
+        option.textContent = tag;
+        tagFilter.appendChild(option);
+      });
+      tagFilter.value = currentValue;
+    }
+
+    function updateNeedsReviewCount() {
+      const count = allLogs.filter(log => log.tags && log.tags.includes('needs review')).length;
+      needsReviewCount.textContent = `${count} need review`;
+    }
+
+    function applyFilters() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const tagFilterValue = tagFilter.value;
+      const privateFilterValue = privateFilter.value;
+      const sortValue = sortSelect.value;
+
+      filteredLogs = allLogs.filter(log => {
+        // Search filter
+        if (searchTerm && !log.content.toLowerCase().includes(searchTerm)) {
+          return false;
+        }
+        // Tag filter
+        if (tagFilterValue && (!log.tags || !log.tags.includes(tagFilterValue))) {
+          return false;
+        }
+        // Private filter
+        if (privateFilterValue === 'public' && log.private) return false;
+        if (privateFilterValue === 'private' && !log.private) return false;
+        return true;
+      });
+
+      // Sort
+      filteredLogs.sort((a, b) => {
+        if (sortValue === 'newest') {
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        } else if (sortValue === 'oldest') {
+          return new Date(a.timestamp) - new Date(b.timestamp);
+        } else if (sortValue === 'edited') {
+          const aTime = a.editedAt || a.timestamp;
+          const bTime = b.editedAt || b.timestamp;
+          return new Date(bTime) - new Date(aTime);
+        }
+        return 0;
+      });
+
+      currentPage = 1;
+      renderTable();
+    }
+
+    function renderTable() {
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+      const pageLogs = filteredLogs.slice(start, end);
+
+      if (pageLogs.length === 0) {
+        logsTableBody.innerHTML = '';
+        emptyState.style.display = 'block';
+        document.getElementById('pagination').style.display = 'none';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+
+      logsTableBody.innerHTML = pageLogs.map(log => {
+        const tags = (log.tags || []).map(tag =>
+          `<span class="tag ${tag === 'needs review' ? 'needs-review' : ''}" onclick="filterByTag('${escapeHtml(tag)}')">${escapeHtml(tag)}</span>`
+        ).join('');
+
+        const hasNeedsReview = log.tags && log.tags.includes('needs review');
+        const versionCount = (log.versions || []).length;
+
+        return `
+          <tr>
+            <td class="col-timestamp">
+              <span class="timestamp">${formatTime(log.timestamp)}</span>
+            </td>
+            <td class="col-content">
+              <div class="content-text content-truncated" id="content-${log.id}">${escapeHtml(log.content)}</div>
+              ${log.content.length > 150 ? `<button class="expand-btn" onclick="toggleExpand('${log.id}')">Show more</button>` : ''}
+            </td>
+            <td class="col-tags">
+              <div class="tags">${tags || '<span style="color:#555">No tags</span>'}</div>
+            </td>
+            <td class="col-status">
+              <div class="status-indicators">
+                ${log.private ? '<span class="indicator private">Private</span>' : ''}
+                ${versionCount > 0 ? `<span class="indicator edited" onclick="showHistory('${log.id}')">Edited (${versionCount})</span>` : ''}
+              </div>
+            </td>
+            <td class="col-actions">
+              <div class="actions">
+                ${hasNeedsReview ? `<button class="btn btn-review" onclick="openReviewModal('${log.id}')">Review</button>` : ''}
+                <button class="btn" onclick="openAddTagModal('${log.id}')">+ Tag</button>
+                <button class="btn btn-edit" onclick="openEditModal('${log.id}')">Edit</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Pagination
+      const totalPages = Math.ceil(filteredLogs.length / pageSize);
+      const pagination = document.getElementById('pagination');
+      if (totalPages > 1) {
+        pagination.style.display = 'flex';
+        document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+        document.getElementById('prevBtn').disabled = currentPage === 1;
+        document.getElementById('nextBtn').disabled = currentPage === totalPages;
+      } else {
+        pagination.style.display = 'none';
+      }
+    }
+
+    function toggleExpand(logId) {
+      const content = document.getElementById(`content-${logId}`);
+      content.classList.toggle('content-truncated');
+      content.classList.toggle('content-expanded');
+      const btn = content.nextElementSibling;
+      if (btn) {
+        btn.textContent = content.classList.contains('content-expanded') ? 'Show less' : 'Show more';
+      }
+    }
+
+    function filterByTag(tag) {
+      tagFilter.value = tag;
+      applyFilters();
+    }
+
+    function formatTime(ts) {
+      const d = new Date(ts);
+      return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Modals
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function getLogById(id) {
+      return allLogs.find(log => log.id === id);
+    }
+
+    // Review Modal
+    let reviewLog = null;
+    let reviewTags = [];
+
+    function openReviewModal(logId) {
+      reviewLog = getLogById(logId);
+      if (!reviewLog) return;
+
+      document.getElementById('reviewLogTime').textContent = formatTime(reviewLog.timestamp);
+      document.getElementById('reviewLogContent').textContent = reviewLog.content;
+
+      // Start with current tags minus 'needs review'
+      reviewTags = (reviewLog.tags || []).filter(t => t !== 'needs review');
+      renderReviewTags();
+
+      document.getElementById('reviewTagInput').value = '';
+      openModal('reviewModal');
+    }
+
+    function renderReviewTags() {
+      const container = document.getElementById('reviewSelectedTags');
+      container.innerHTML = reviewTags.map(tag =>
+        `<span class="selected-tag">${escapeHtml(tag)}<button onclick="removeReviewTag('${escapeHtml(tag)}')">&times;</button></span>`
+      ).join('');
+    }
+
+    function removeReviewTag(tag) {
+      reviewTags = reviewTags.filter(t => t !== tag);
+      renderReviewTags();
+    }
+
+    function addReviewTag(tag) {
+      const trimmed = tag.trim().toLowerCase();
+      if (trimmed && !reviewTags.includes(trimmed)) {
+        reviewTags.push(trimmed);
+        renderReviewTags();
+      }
+    }
+
+    document.getElementById('reviewTagInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addReviewTag(e.target.value);
+        e.target.value = '';
+        hideTagSuggestions('reviewTagSuggestions');
+      }
+    });
+
+    document.getElementById('reviewTagInput').addEventListener('input', (e) => {
+      showTagSuggestions(e.target.value, 'reviewTagSuggestions', addReviewTag);
+    });
+
+    document.getElementById('saveReviewBtn').addEventListener('click', async () => {
+      if (!reviewLog) return;
+
+      try {
+        await fetch(`/logs/${reviewLog.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tags: reviewTags })
+        });
+        closeModal('reviewModal');
+        await loadLogs();
+        await loadTags();
+      } catch (e) {
+        alert('Failed to save');
+      }
+    });
+
+    // Add Tag Modal
+    let addTagLog = null;
+    let addTagTags = [];
+
+    function openAddTagModal(logId) {
+      addTagLog = getLogById(logId);
+      if (!addTagLog) return;
+
+      document.getElementById('addTagLogTime').textContent = formatTime(addTagLog.timestamp);
+      document.getElementById('addTagLogContent').textContent = addTagLog.content;
+
+      addTagTags = [...(addTagLog.tags || [])];
+      renderAddTagTags();
+
+      document.getElementById('addTagInput').value = '';
+      openModal('addTagModal');
+    }
+
+    function renderAddTagTags() {
+      const container = document.getElementById('addTagCurrentTags');
+      container.innerHTML = addTagTags.map(tag =>
+        `<span class="selected-tag ${tag === 'needs review' ? 'needs-review' : ''}">${escapeHtml(tag)}<button onclick="removeAddTagTag('${escapeHtml(tag)}')">&times;</button></span>`
+      ).join('');
+    }
+
+    function removeAddTagTag(tag) {
+      addTagTags = addTagTags.filter(t => t !== tag);
+      renderAddTagTags();
+    }
+
+    function addAddTagTag(tag) {
+      const trimmed = tag.trim().toLowerCase();
+      if (trimmed && !addTagTags.includes(trimmed)) {
+        addTagTags.push(trimmed);
+        renderAddTagTags();
+      }
+    }
+
+    document.getElementById('addTagInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addAddTagTag(e.target.value);
+        e.target.value = '';
+        hideTagSuggestions('addTagSuggestions');
+      }
+    });
+
+    document.getElementById('addTagInput').addEventListener('input', (e) => {
+      showTagSuggestions(e.target.value, 'addTagSuggestions', addAddTagTag);
+    });
+
+    document.getElementById('saveAddTagBtn').addEventListener('click', async () => {
+      if (!addTagLog) return;
+
+      try {
+        await fetch(`/logs/${addTagLog.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tags: addTagTags })
+        });
+        closeModal('addTagModal');
+        await loadLogs();
+        await loadTags();
+      } catch (e) {
+        alert('Failed to save');
+      }
+    });
+
+    // Edit Modal
+    let editLog = null;
+    let editTags = [];
+
+    function openEditModal(logId) {
+      editLog = getLogById(logId);
+      if (!editLog) return;
+
+      document.getElementById('editContent').value = editLog.content;
+      document.getElementById('editPrivate').checked = editLog.private || false;
+
+      editTags = [...(editLog.tags || [])];
+      renderEditTags();
+
+      document.getElementById('editTagInput').value = '';
+      openModal('editModal');
+    }
+
+    function renderEditTags() {
+      const container = document.getElementById('editSelectedTags');
+      container.innerHTML = editTags.map(tag =>
+        `<span class="selected-tag ${tag === 'needs review' ? 'needs-review' : ''}">${escapeHtml(tag)}<button onclick="removeEditTag('${escapeHtml(tag)}')">&times;</button></span>`
+      ).join('');
+    }
+
+    function removeEditTag(tag) {
+      editTags = editTags.filter(t => t !== tag);
+      renderEditTags();
+    }
+
+    function addEditTag(tag) {
+      const trimmed = tag.trim().toLowerCase();
+      if (trimmed && !editTags.includes(trimmed)) {
+        editTags.push(trimmed);
+        renderEditTags();
+      }
+    }
+
+    document.getElementById('editTagInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addEditTag(e.target.value);
+        e.target.value = '';
+        hideTagSuggestions('editTagSuggestions');
+      }
+    });
+
+    document.getElementById('editTagInput').addEventListener('input', (e) => {
+      showTagSuggestions(e.target.value, 'editTagSuggestions', addEditTag);
+    });
+
+    document.getElementById('saveEditBtn').addEventListener('click', async () => {
+      if (!editLog) return;
+
+      const content = document.getElementById('editContent').value.trim();
+      const isPrivate = document.getElementById('editPrivate').checked;
+
+      if (!content) {
+        alert('Content cannot be empty');
+        return;
+      }
+
+      try {
+        await fetch(`/logs/${editLog.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content,
+            private: isPrivate,
+            tags: editTags
+          })
+        });
+        closeModal('editModal');
+        await loadLogs();
+        await loadTags();
+      } catch (e) {
+        alert('Failed to save');
+      }
+    });
+
+    // Version History Modal
+    function showHistory(logId) {
+      const log = getLogById(logId);
+      if (!log) return;
+
+      const versions = log.versions || [];
+      const versionList = document.getElementById('versionList');
+
+      // Current version first
+      let html = `
+        <div class="version-item version-current">
+          <div class="version-meta">${formatTime(log.editedAt || log.timestamp)}</div>
+          <div class="version-content">${escapeHtml(log.content)}</div>
+        </div>
+      `;
+
+      // Previous versions (newest first)
+      const sortedVersions = [...versions].reverse();
+      html += sortedVersions.map(v => `
+        <div class="version-item">
+          <div class="version-meta">${formatTime(v.editedAt)}</div>
+          <div class="version-content">${escapeHtml(v.content)}</div>
+        </div>
+      `).join('');
+
+      versionList.innerHTML = html;
+      openModal('historyModal');
+    }
+
+    // Tag suggestions
+    function showTagSuggestions(value, suggestionsId, addCallback) {
+      const suggestions = document.getElementById(suggestionsId);
+      const trimmed = value.trim().toLowerCase();
+
+      if (!trimmed) {
+        suggestions.classList.remove('active');
+        return;
+      }
+
+      const matches = knownTags.filter(tag =>
+        tag.toLowerCase().includes(trimmed) && tag.toLowerCase() !== trimmed
+      );
+
+      if (matches.length === 0) {
+        suggestions.classList.remove('active');
+        return;
+      }
+
+      suggestions.innerHTML = matches.slice(0, 5).map(tag =>
+        `<div class="tag-suggestion" onclick="selectTagSuggestion('${escapeHtml(tag)}', '${suggestionsId}')">${escapeHtml(tag)}</div>`
+      ).join('');
+      suggestions.classList.add('active');
+    }
+
+    function hideTagSuggestions(suggestionsId) {
+      document.getElementById(suggestionsId).classList.remove('active');
+    }
+
+    function selectTagSuggestion(tag, suggestionsId) {
+      // Determine which modal we're in and add the tag
+      if (suggestionsId === 'reviewTagSuggestions') {
+        addReviewTag(tag);
+        document.getElementById('reviewTagInput').value = '';
+      } else if (suggestionsId === 'addTagSuggestions') {
+        addAddTagTag(tag);
+        document.getElementById('addTagInput').value = '';
+      } else if (suggestionsId === 'editTagSuggestions') {
+        addEditTag(tag);
+        document.getElementById('editTagInput').value = '';
+      }
+      hideTagSuggestions(suggestionsId);
+    }
+
+    // Close modals on outside click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove('active');
+        }
+      });
+    });
+
+    // Pagination
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      const totalPages = Math.ceil(filteredLogs.length / pageSize);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+      }
+    });
+
+    // Event listeners for filters
+    searchInput.addEventListener('input', debounce(applyFilters, 300));
+    tagFilter.addEventListener('change', applyFilters);
+    privateFilter.addEventListener('change', applyFilters);
+    sortSelect.addEventListener('change', applyFilters);
+
+    function debounce(fn, delay) {
+      let timeoutId;
+      return function(...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
+
+    // Initialize
+    loadLogs();
+    loadTags();
+  </script>
+</body>
+</html>
