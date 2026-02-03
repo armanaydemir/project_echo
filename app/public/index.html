@@ -241,6 +241,9 @@
   <div id="logs" class="hidden"></div>
 
   <script>
+    // Feature flags
+    const SHOW_REVIEW_BADGE = false;
+
     const form = document.getElementById('form');
     const content = document.getElementById('content');
     const privateCheckbox = document.getElementById('private');
@@ -261,15 +264,17 @@
           })
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-        // Update needs review badge
-        const needsReviewCount = logs.filter(log => log.tags && log.tags.includes('needs review')).length;
-        const badge = document.getElementById('reviewBadge');
-        const countEl = document.getElementById('reviewCount');
-        if (needsReviewCount > 0) {
-          countEl.textContent = needsReviewCount + ' need review';
-          badge.classList.add('visible');
-        } else {
-          badge.classList.remove('visible');
+        // Update needs review badge (behind flag)
+        if (SHOW_REVIEW_BADGE) {
+          const needsReviewCount = logs.filter(log => log.tags && log.tags.includes('needs review')).length;
+          const badge = document.getElementById('reviewBadge');
+          const countEl = document.getElementById('reviewCount');
+          if (needsReviewCount > 0) {
+            countEl.textContent = needsReviewCount + ' need review';
+            badge.classList.add('visible');
+          } else {
+            badge.classList.remove('visible');
+          }
         }
 
         logsDiv.innerHTML = filtered.map((log, i) => {
