@@ -98,7 +98,7 @@ function addKnownTags(newTags) {
   return updated;
 }
 
-// Migrate old logs without ID or tags
+// Migrate old logs without ID or tags, and convert private boolean to tag
 function migrateLogs(logs) {
   let needsWrite = false;
   const migrated = logs.map(log => {
@@ -109,6 +109,16 @@ function migrateLogs(logs) {
     }
     if (!log.tags) {
       log.tags = [DEFAULT_TAG];
+      changed = true;
+    }
+    // Migrate private boolean to tag
+    if (log.private === true && !log.tags.includes('private')) {
+      log.tags.push('private');
+      changed = true;
+    }
+    // Remove old private field
+    if ('private' in log) {
+      delete log.private;
       changed = true;
     }
     if (changed) needsWrite = true;
@@ -122,9 +132,9 @@ function migrateLogs(logs) {
 
 // Helper function to get non-private logs
 function getNonPrivateLogs() {
-  const logs = readLogs();
+  const logs = migrateLogs(readLogs());
   return logs
-    .filter(log => !log.private)
+    .filter(log => !log.tags || !log.tags.includes('private'))
     .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 }
 
@@ -146,17 +156,24 @@ function formatLogsAsContext(logs) {
 // POST /logs - Save a log entry
 app.post('/logs', (req, res) => {
   const { content, private: isPrivate, tags } = req.body;
+  let entryTags = tags && tags.length > 0 ? [...tags] : [DEFAULT_TAG];
+
+  // Handle private as a tag
+  if (isPrivate && !entryTags.includes('private')) {
+    entryTags.push('private');
+  }
+
   const entry = {
     id: generateId(),
     content,
-    private: !!isPrivate,
-    tags: tags && tags.length > 0 ? tags : [DEFAULT_TAG],
+    tags: entryTags,
     timestamp: new Date().toISOString()
   };
   fs.appendFileSync(LOGS_FILE, JSON.stringify(entry) + '\n');
-  // Track any new tags
-  if (entry.tags.length > 0) {
-    addKnownTags(entry.tags);
+  // Track any new tags (except private)
+  const tagsToTrack = entry.tags.filter(t => t !== 'private');
+  if (tagsToTrack.length > 0) {
+    addKnownTags(tagsToTrack);
   }
   res.json(entry);
 });
@@ -174,7 +191,7 @@ app.put('/logs/:id', (req, res) => {
   const { id } = req.params;
   const { content, private: isPrivate, tags } = req.body;
 
-  const logs = readLogs();
+  const logs = migrateLogs(readLogs());
   const index = logs.findIndex(log => log.id === id);
 
   if (index === -1) {
@@ -198,13 +215,21 @@ app.put('/logs/:id', (req, res) => {
 
   // Update tags
   if (tags !== undefined) {
-    log.tags = tags;
-    addKnownTags(tags);
+    log.tags = [...tags];
+    // Track tags (except private)
+    const tagsToTrack = tags.filter(t => t !== 'private');
+    if (tagsToTrack.length > 0) {
+      addKnownTags(tagsToTrack);
+    }
   }
 
-  // Update private status
+  // Handle private as a tag
   if (isPrivate !== undefined) {
-    log.private = !!isPrivate;
+    if (isPrivate && !log.tags.includes('private')) {
+      log.tags.push('private');
+    } else if (!isPrivate && log.tags.includes('private')) {
+      log.tags = log.tags.filter(t => t !== 'private');
+    }
   }
 
   logs[index] = log;

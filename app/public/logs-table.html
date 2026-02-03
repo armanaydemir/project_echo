@@ -12,18 +12,20 @@
       background: #0a0a0a;
       color: #e0e0e0;
       min-height: 100vh;
+      line-height: 1.5;
     }
 
+    /* Header */
     .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 24px;
-      background: rgba(255, 255, 255, 0.02);
-      border-bottom: 1px solid #222;
       position: sticky;
       top: 0;
       z-index: 100;
+      background: #0a0a0a;
+      border-bottom: 1px solid #222;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .header h1 {
@@ -36,8 +38,38 @@
 
     .header-nav {
       display: flex;
-      gap: 20px;
       align-items: center;
+      gap: 20px;
+    }
+
+    .review-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(234, 179, 8, 0.15);
+      border-radius: 20px;
+      font-size: 12px;
+      color: #eab308;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .review-indicator:hover {
+      background: rgba(234, 179, 8, 0.25);
+    }
+
+    .review-dot {
+      width: 6px;
+      height: 6px;
+      background: #eab308;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
     }
 
     .header a {
@@ -51,18 +83,9 @@
       color: #e0e0e0;
     }
 
-    .needs-review-badge {
-      background: rgba(234, 179, 8, 0.2);
-      color: #eab308;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-
+    /* Filter Bar */
     .filter-bar {
       padding: 16px 24px;
-      background: rgba(255, 255, 255, 0.01);
       border-bottom: 1px solid #222;
       display: flex;
       gap: 12px;
@@ -81,9 +104,14 @@
       font-size: 14px;
     }
 
+    .search-input::placeholder {
+      color: #555;
+    }
+
     .search-input:focus {
       outline: none;
       border-color: #555;
+      background: rgba(255, 255, 255, 0.05);
     }
 
     .filter-select {
@@ -101,224 +129,266 @@
       border-color: #555;
     }
 
-    .table-container {
-      padding: 0 24px 24px;
-      overflow-x: auto;
+    /* Main Content */
+    .main-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 16px;
+    /* Log Cards */
+    .logs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    th {
-      text-align: left;
-      padding: 12px 16px;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #666;
-      border-bottom: 1px solid #333;
-      font-weight: 500;
-    }
-
-    td {
-      padding: 14px 16px;
-      border-bottom: 1px solid #1a1a1a;
-      vertical-align: top;
-    }
-
-    tr:hover td {
+    .log-card {
       background: rgba(255, 255, 255, 0.02);
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 16px 20px;
+      position: relative;
+      transition: all 0.15s ease;
     }
 
-    .col-timestamp {
-      width: 140px;
-      white-space: nowrap;
+    .log-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: #333;
     }
 
-    .col-content {
-      min-width: 300px;
+    .log-card.needs-review {
+      border-left: 3px solid #eab308;
     }
 
-    .col-tags {
-      width: 200px;
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
     }
 
-    .col-status {
-      width: 100px;
+    .log-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .col-actions {
-      width: 160px;
-      white-space: nowrap;
-    }
-
-    .timestamp {
+    .log-timestamp {
+      font-size: 11px;
       font-family: monospace;
-      font-size: 12px;
       color: #666;
     }
 
-    .content-text {
-      line-height: 1.5;
+    .log-indicators {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .indicator {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      width: fit-content;
+    }
+
+    .indicator-private {
+      background: rgba(139, 92, 246, 0.15);
+      color: #a78bfa;
+    }
+
+    .indicator-edited {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      cursor: pointer;
+    }
+
+    .indicator-edited:hover {
+      background: rgba(59, 130, 246, 0.25);
+    }
+
+    .log-body {
+      min-width: 0;
+    }
+
+    .log-content {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #e0e0e0;
       white-space: pre-wrap;
       word-break: break-word;
     }
 
-    .content-truncated {
-      max-height: 60px;
+    .log-content-truncated {
+      max-height: 4.2em;
       overflow: hidden;
       position: relative;
     }
 
-    .content-truncated::after {
+    .log-content-truncated::after {
       content: '';
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      height: 20px;
-      background: linear-gradient(transparent, #0a0a0a);
+      height: 1.5em;
+      background: linear-gradient(transparent, rgba(10, 10, 10, 0.95));
     }
 
-    .content-expanded {
-      max-height: none;
-    }
-
-    .content-expanded::after {
-      display: none;
-    }
-
-    .expand-btn {
-      font-size: 11px;
-      color: #666;
+    .expand-toggle {
+      margin-top: 6px;
+      padding: 0;
       background: none;
       border: none;
+      color: #666;
+      font-size: 11px;
       cursor: pointer;
-      padding: 4px 0;
-      margin-top: 4px;
     }
 
-    .expand-btn:hover {
+    .expand-toggle:hover {
       color: #e0e0e0;
     }
 
-    .tags {
+    .log-tags {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
     }
 
     .tag {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 11px;
       background: rgba(255, 255, 255, 0.08);
-      color: #aaa;
+      color: #888;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s;
     }
 
     .tag:hover {
       background: rgba(255, 255, 255, 0.12);
+      color: #e0e0e0;
     }
 
-    .tag.needs-review {
+    .tag-needs-review {
       background: rgba(234, 179, 8, 0.2);
       color: #eab308;
     }
 
-    .tag .remove-tag {
-      margin-left: 6px;
-      opacity: 0.5;
-      font-size: 14px;
+    .log-footer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
     }
 
-    .tag .remove-tag:hover {
+    .edit-btn {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #666;
+      opacity: 0;
+    }
+
+    .log-card:hover .edit-btn {
       opacity: 1;
     }
 
-    .status-indicators {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    .edit-btn:hover {
+      color: #e0e0e0;
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .indicator {
-      font-size: 11px;
-      color: #666;
-    }
-
-    .indicator.private {
-      color: #8b5cf6;
-    }
-
-    .indicator.edited {
-      color: #3b82f6;
-      cursor: pointer;
-    }
-
-    .indicator.edited:hover {
-      text-decoration: underline;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn {
+    .action-btn {
       padding: 6px 12px;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: 11px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s;
       border: 1px solid #333;
       background: rgba(255, 255, 255, 0.03);
       color: #e0e0e0;
+      white-space: nowrap;
     }
 
-    .btn:hover {
+    .action-btn:hover {
       background: rgba(255, 255, 255, 0.08);
       border-color: #444;
     }
 
-    .btn-review {
+    .action-btn-review {
       background: rgba(234, 179, 8, 0.15);
       border-color: rgba(234, 179, 8, 0.3);
       color: #eab308;
     }
 
-    .btn-review:hover {
+    .action-btn-review:hover {
       background: rgba(234, 179, 8, 0.25);
     }
 
-    .btn-edit {
-      background: rgba(59, 130, 246, 0.15);
-      border-color: rgba(59, 130, 246, 0.3);
-      color: #3b82f6;
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
     }
 
-    .btn-edit:hover {
-      background: rgba(59, 130, 246, 0.25);
+    .empty-state h3 {
+      font-weight: 400;
+      margin-bottom: 8px;
     }
 
-    /* Modal styles */
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      padding: 24px 0;
+      margin-top: 16px;
+    }
+
+    .pagination-btn {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #444;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .pagination-info {
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* Modals */
     .modal-overlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
       z-index: 1000;
       align-items: center;
       justify-content: center;
+      padding: 24px;
     }
 
     .modal-overlay.active {
@@ -329,9 +399,9 @@
       background: #151515;
       border: 1px solid #333;
       border-radius: 12px;
-      width: 90%;
+      width: 100%;
       max-width: 500px;
-      max-height: 90vh;
+      max-height: 85vh;
       overflow-y: auto;
     }
 
@@ -343,7 +413,7 @@
       align-items: center;
     }
 
-    .modal-header h2 {
+    .modal-title {
       font-size: 16px;
       font-weight: 500;
     }
@@ -374,51 +444,81 @@
       gap: 12px;
     }
 
-    .log-preview {
+    .preview-card {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid #222;
       border-radius: 8px;
       padding: 12px;
       margin-bottom: 16px;
-      font-size: 14px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      max-height: 150px;
-      overflow-y: auto;
     }
 
-    .log-preview-time {
+    .preview-timestamp {
       font-size: 11px;
+      font-family: monospace;
       color: #666;
       margin-bottom: 8px;
-      font-family: monospace;
+    }
+
+    .preview-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #ccc;
+      max-height: 120px;
+      overflow-y: auto;
+      white-space: pre-wrap;
     }
 
     .form-group {
       margin-bottom: 16px;
     }
 
-    .form-group label {
+    .form-label {
       display: block;
       font-size: 12px;
       color: #888;
-      margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      margin-bottom: 8px;
     }
 
-    .tag-input-container {
+    .tag-input-wrapper {
       position: relative;
     }
 
+    .tag-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
     .tag-input {
-      width: 100%;
+      flex: 1;
       padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.03);
       border: 1px solid #333;
       border-radius: 6px;
-      background: rgba(255, 255, 255, 0.03);
       color: #e0e0e0;
       font-size: 14px;
+    }
+
+    .tag-add-btn {
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #888;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tag-add-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #e0e0e0;
+      border-color: #444;
+    }
+
+    .tag-input::placeholder {
+      color: #555;
     }
 
     .tag-input:focus {
@@ -428,13 +528,12 @@
 
     .tag-suggestions {
       position: absolute;
-      top: 100%;
+      top: calc(100% + 4px);
       left: 0;
       right: 0;
       background: #1a1a1a;
       border: 1px solid #333;
       border-radius: 6px;
-      margin-top: 4px;
       max-height: 150px;
       overflow-y: auto;
       z-index: 10;
@@ -447,8 +546,8 @@
 
     .tag-suggestion {
       padding: 10px 14px;
-      cursor: pointer;
       font-size: 14px;
+      cursor: pointer;
     }
 
     .tag-suggestion:hover {
@@ -465,14 +564,15 @@
     .selected-tag {
       display: inline-flex;
       align-items: center;
-      padding: 6px 12px;
-      border-radius: 16px;
-      font-size: 13px;
+      gap: 8px;
+      padding: 5px 10px;
       background: rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      font-size: 12px;
       color: #e0e0e0;
     }
 
-    .selected-tag.needs-review {
+    .selected-tag.tag-needs-review {
       background: rgba(234, 179, 8, 0.2);
       color: #eab308;
     }
@@ -481,38 +581,77 @@
       background: none;
       border: none;
       color: inherit;
-      margin-left: 8px;
       cursor: pointer;
-      font-size: 16px;
-      opacity: 0.7;
+      padding: 0;
+      font-size: 14px;
+      opacity: 0.6;
     }
 
     .selected-tag button:hover {
       opacity: 1;
     }
 
+    .edit-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 14px;
+      resize: vertical;
+      font-family: inherit;
+      line-height: 1.5;
+    }
+
+    .edit-textarea:focus {
+      outline: none;
+      border-color: #555;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox-row input {
+      width: 16px;
+      height: 16px;
+    }
+
+    .checkbox-row label {
+      font-size: 14px;
+      color: #e0e0e0;
+      cursor: pointer;
+    }
+
     .btn-primary {
+      padding: 10px 20px;
       background: linear-gradient(135deg, #333 0%, #222 100%);
       color: #fff;
       border: 1px solid #444;
-      padding: 10px 20px;
       border-radius: 6px;
-      cursor: pointer;
       font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
     .btn-primary:hover {
       background: linear-gradient(135deg, #444 0%, #333 100%);
+      border-color: #555;
     }
 
     .btn-secondary {
+      padding: 10px 20px;
       background: transparent;
       color: #888;
       border: 1px solid #333;
-      padding: 10px 20px;
       border-radius: 6px;
-      cursor: pointer;
       font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
     .btn-secondary:hover {
@@ -520,18 +659,7 @@
       border-color: #444;
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #666;
-    }
-
-    .empty-state h3 {
-      font-weight: 400;
-      margin-bottom: 8px;
-    }
-
-    /* Version history modal */
+    /* Version History */
     .version-list {
       max-height: 300px;
       overflow-y: auto;
@@ -546,95 +674,87 @@
       border-bottom: none;
     }
 
+    .version-item.current {
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
     .version-meta {
       font-size: 11px;
+      font-family: monospace;
       color: #666;
       margin-bottom: 8px;
-      font-family: monospace;
+    }
+
+    .version-meta .current-badge {
+      margin-left: 8px;
+      padding: 2px 6px;
+      background: #3b82f6;
+      color: #fff;
+      border-radius: 3px;
+      font-size: 9px;
+      font-family: system-ui;
     }
 
     .version-content {
       font-size: 14px;
       line-height: 1.5;
-      white-space: pre-wrap;
       color: #aaa;
+      white-space: pre-wrap;
     }
 
-    .version-current {
-      background: rgba(59, 130, 246, 0.1);
-      border-radius: 8px;
-    }
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header {
+        padding: 14px 16px;
+      }
 
-    .version-current .version-meta::after {
-      content: ' (current)';
-      color: #3b82f6;
-    }
+      .filter-bar {
+        padding: 14px 16px;
+        flex-direction: column;
+      }
 
-    /* Edit modal */
-    .edit-textarea {
-      width: 100%;
-      min-height: 120px;
-      padding: 12px;
-      border: 1px solid #333;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.03);
-      color: #e0e0e0;
-      font-size: 14px;
-      resize: vertical;
-      font-family: inherit;
-      line-height: 1.5;
-    }
+      .search-input {
+        min-width: 100%;
+      }
 
-    .edit-textarea:focus {
-      outline: none;
-      border-color: #555;
-    }
+      .main-content {
+        padding: 16px;
+      }
 
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+      .log-card {
+        padding: 14px 16px;
+      }
 
-    .checkbox-group input {
-      width: 16px;
-      height: 16px;
-    }
+      .log-header {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
 
-    .checkbox-group label {
-      margin: 0;
-      text-transform: none;
-      font-size: 14px;
-      color: #e0e0e0;
-    }
+      .edit-btn {
+        opacity: 1;
+      }
 
-    .pagination {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      padding: 20px;
-    }
-
-    .pagination button {
-      padding: 8px 16px;
-    }
-
-    .pagination span {
-      color: #666;
-      font-size: 14px;
+      .modal {
+        max-height: 100%;
+        border-radius: 8px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="header">
+  <header class="header">
     <h1>Logs Table</h1>
     <div class="header-nav">
-      <span class="needs-review-badge" id="needsReviewCount">0 need review</span>
+      <div class="review-indicator" id="reviewIndicator" onclick="filterByTag('needs review')" style="display: none;">
+        <span class="review-dot"></span>
+        <span id="needsReviewCount">0 need review</span>
+      </div>
       <a href="/">Home</a>
       <a href="/chat">Chat</a>
     </div>
-  </div>
+  </header>
 
   <div class="filter-bar">
     <input type="text" class="search-input" id="searchInput" placeholder="Search logs...">
@@ -654,48 +774,40 @@
     </select>
   </div>
 
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th class="col-timestamp">Timestamp</th>
-          <th class="col-content">Content</th>
-          <th class="col-tags">Tags</th>
-          <th class="col-status">Status</th>
-          <th class="col-actions">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="logsTableBody">
-      </tbody>
-    </table>
+  <main class="main-content">
+    <div class="logs-list" id="logsList"></div>
 
     <div class="empty-state" id="emptyState" style="display: none;">
       <h3>No logs found</h3>
       <p>Try adjusting your filters or create some logs first.</p>
     </div>
-  </div>
 
-  <div class="pagination" id="pagination" style="display: none;">
-    <button class="btn" id="prevBtn">Previous</button>
-    <span id="pageInfo">Page 1 of 1</span>
-    <button class="btn" id="nextBtn">Next</button>
-  </div>
+    <div class="pagination" id="pagination" style="display: none;">
+      <button class="pagination-btn" id="prevBtn">Previous</button>
+      <span class="pagination-info" id="pageInfo">Page 1 of 1</span>
+      <button class="pagination-btn" id="nextBtn">Next</button>
+    </div>
+  </main>
 
   <!-- Review Modal -->
   <div class="modal-overlay" id="reviewModal">
     <div class="modal">
       <div class="modal-header">
-        <h2>Review Log</h2>
+        <h2 class="modal-title">Review Log</h2>
         <button class="modal-close" onclick="closeModal('reviewModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="log-preview-time" id="reviewLogTime"></div>
-        <div class="log-preview" id="reviewLogContent"></div>
-
+        <div class="preview-card">
+          <div class="preview-timestamp" id="reviewLogTime"></div>
+          <div class="preview-content" id="reviewLogContent"></div>
+        </div>
         <div class="form-group">
-          <label>Add Tags</label>
-          <div class="tag-input-container">
-            <input type="text" class="tag-input" id="reviewTagInput" placeholder="Type a tag and press Enter...">
+          <label class="form-label">Add Tags</label>
+          <div class="tag-input-wrapper">
+            <div class="tag-input-row">
+              <input type="text" class="tag-input" id="reviewTagInput" placeholder="Type a tag...">
+              <button type="button" class="tag-add-btn" id="reviewTagAddBtn">Add</button>
+            </div>
             <div class="tag-suggestions" id="reviewTagSuggestions"></div>
           </div>
           <div class="selected-tags" id="reviewSelectedTags"></div>
@@ -712,22 +824,25 @@
   <div class="modal-overlay" id="addTagModal">
     <div class="modal">
       <div class="modal-header">
-        <h2>Add Tags</h2>
+        <h2 class="modal-title">Manage Tags</h2>
         <button class="modal-close" onclick="closeModal('addTagModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="log-preview-time" id="addTagLogTime"></div>
-        <div class="log-preview" id="addTagLogContent"></div>
-
+        <div class="preview-card">
+          <div class="preview-timestamp" id="addTagLogTime"></div>
+          <div class="preview-content" id="addTagLogContent"></div>
+        </div>
         <div class="form-group">
-          <label>Current Tags</label>
+          <label class="form-label">Current Tags</label>
           <div class="selected-tags" id="addTagCurrentTags"></div>
         </div>
-
         <div class="form-group">
-          <label>Add New Tag</label>
-          <div class="tag-input-container">
-            <input type="text" class="tag-input" id="addTagInput" placeholder="Type a tag and press Enter...">
+          <label class="form-label">Add New Tag</label>
+          <div class="tag-input-wrapper">
+            <div class="tag-input-row">
+              <input type="text" class="tag-input" id="addTagInput" placeholder="Type a tag...">
+              <button type="button" class="tag-add-btn" id="addTagAddBtn">Add</button>
+            </div>
             <div class="tag-suggestions" id="addTagSuggestions"></div>
           </div>
         </div>
@@ -743,26 +858,27 @@
   <div class="modal-overlay" id="editModal">
     <div class="modal">
       <div class="modal-header">
-        <h2>Edit Log</h2>
+        <h2 class="modal-title">Edit Log</h2>
         <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label>Content</label>
+          <label class="form-label">Content</label>
           <textarea class="edit-textarea" id="editContent"></textarea>
         </div>
-
         <div class="form-group">
-          <div class="checkbox-group">
+          <div class="checkbox-row">
             <input type="checkbox" id="editPrivate">
             <label for="editPrivate">Private log</label>
           </div>
         </div>
-
         <div class="form-group">
-          <label>Tags</label>
-          <div class="tag-input-container">
-            <input type="text" class="tag-input" id="editTagInput" placeholder="Type a tag and press Enter...">
+          <label class="form-label">Tags</label>
+          <div class="tag-input-wrapper">
+            <div class="tag-input-row">
+              <input type="text" class="tag-input" id="editTagInput" placeholder="Type a tag...">
+              <button type="button" class="tag-add-btn" id="editTagAddBtn">Add</button>
+            </div>
             <div class="tag-suggestions" id="editTagSuggestions"></div>
           </div>
           <div class="selected-tags" id="editSelectedTags"></div>
@@ -779,7 +895,7 @@
   <div class="modal-overlay" id="historyModal">
     <div class="modal">
       <div class="modal-header">
-        <h2>Version History</h2>
+        <h2 class="modal-title">Version History</h2>
         <button class="modal-close" onclick="closeModal('historyModal')">&times;</button>
       </div>
       <div class="modal-body">
@@ -798,18 +914,17 @@
     let knownTags = [];
     let currentPage = 1;
     const pageSize = 20;
-    let currentEditLog = null;
 
     // Elements
-    const logsTableBody = document.getElementById('logsTableBody');
+    const logsList = document.getElementById('logsList');
     const emptyState = document.getElementById('emptyState');
     const needsReviewCount = document.getElementById('needsReviewCount');
+    const reviewIndicator = document.getElementById('reviewIndicator');
     const searchInput = document.getElementById('searchInput');
     const tagFilter = document.getElementById('tagFilter');
     const privateFilter = document.getElementById('privateFilter');
     const sortSelect = document.getElementById('sortSelect');
 
-    // Load data
     async function loadLogs() {
       try {
         const res = await fetch('/logs');
@@ -847,6 +962,7 @@
     function updateNeedsReviewCount() {
       const count = allLogs.filter(log => log.tags && log.tags.includes('needs review')).length;
       needsReviewCount.textContent = `${count} need review`;
+      reviewIndicator.style.display = count > 0 ? 'flex' : 'none';
     }
 
     function applyFilters() {
@@ -856,45 +972,33 @@
       const sortValue = sortSelect.value;
 
       filteredLogs = allLogs.filter(log => {
-        // Search filter
-        if (searchTerm && !log.content.toLowerCase().includes(searchTerm)) {
-          return false;
-        }
-        // Tag filter
-        if (tagFilterValue && (!log.tags || !log.tags.includes(tagFilterValue))) {
-          return false;
-        }
-        // Private filter
-        if (privateFilterValue === 'public' && log.private) return false;
-        if (privateFilterValue === 'private' && !log.private) return false;
+        const isPrivate = log.tags && log.tags.includes('private');
+        if (searchTerm && !log.content.toLowerCase().includes(searchTerm)) return false;
+        if (tagFilterValue && (!log.tags || !log.tags.includes(tagFilterValue))) return false;
+        if (privateFilterValue === 'public' && isPrivate) return false;
+        if (privateFilterValue === 'private' && !isPrivate) return false;
         return true;
       });
 
-      // Sort
       filteredLogs.sort((a, b) => {
-        if (sortValue === 'newest') {
-          return new Date(b.timestamp) - new Date(a.timestamp);
-        } else if (sortValue === 'oldest') {
-          return new Date(a.timestamp) - new Date(b.timestamp);
-        } else if (sortValue === 'edited') {
-          const aTime = a.editedAt || a.timestamp;
-          const bTime = b.editedAt || b.timestamp;
-          return new Date(bTime) - new Date(aTime);
+        if (sortValue === 'newest') return new Date(b.timestamp) - new Date(a.timestamp);
+        if (sortValue === 'oldest') return new Date(a.timestamp) - new Date(b.timestamp);
+        if (sortValue === 'edited') {
+          return new Date(b.editedAt || b.timestamp) - new Date(a.editedAt || a.timestamp);
         }
         return 0;
       });
 
       currentPage = 1;
-      renderTable();
+      renderLogs();
     }
 
-    function renderTable() {
+    function renderLogs() {
       const start = (currentPage - 1) * pageSize;
-      const end = start + pageSize;
-      const pageLogs = filteredLogs.slice(start, end);
+      const pageLogs = filteredLogs.slice(start, start + pageSize);
 
       if (pageLogs.length === 0) {
-        logsTableBody.innerHTML = '';
+        logsList.innerHTML = '';
         emptyState.style.display = 'block';
         document.getElementById('pagination').style.display = 'none';
         return;
@@ -902,44 +1006,42 @@
 
       emptyState.style.display = 'none';
 
-      logsTableBody.innerHTML = pageLogs.map(log => {
-        const tags = (log.tags || []).map(tag =>
-          `<span class="tag ${tag === 'needs review' ? 'needs-review' : ''}" onclick="filterByTag('${escapeHtml(tag)}')">${escapeHtml(tag)}</span>`
+      logsList.innerHTML = pageLogs.map(log => {
+        const hasNeedsReview = log.tags && log.tags.includes('needs review');
+        const isPrivate = log.tags && log.tags.includes('private');
+        const versionCount = (log.versions || []).length;
+        const isLong = log.content.length > 200;
+
+        // Filter out 'private' from displayed tags
+        const displayTags = (log.tags || []).filter(t => t !== 'private');
+        const tags = displayTags.map(tag =>
+          `<span class="tag ${tag === 'needs review' ? 'tag-needs-review' : ''}" onclick="filterByTag('${escapeHtml(tag)}')">${escapeHtml(tag)}</span>`
         ).join('');
 
-        const hasNeedsReview = log.tags && log.tags.includes('needs review');
-        const versionCount = (log.versions || []).length;
-
         return `
-          <tr>
-            <td class="col-timestamp">
-              <span class="timestamp">${formatTime(log.timestamp)}</span>
-            </td>
-            <td class="col-content">
-              <div class="content-text content-truncated" id="content-${log.id}">${escapeHtml(log.content)}</div>
-              ${log.content.length > 150 ? `<button class="expand-btn" onclick="toggleExpand('${log.id}')">Show more</button>` : ''}
-            </td>
-            <td class="col-tags">
-              <div class="tags">${tags || '<span style="color:#555">No tags</span>'}</div>
-            </td>
-            <td class="col-status">
-              <div class="status-indicators">
-                ${log.private ? '<span class="indicator private">Private</span>' : ''}
-                ${versionCount > 0 ? `<span class="indicator edited" onclick="showHistory('${log.id}')">Edited (${versionCount})</span>` : ''}
+          <article class="log-card ${hasNeedsReview ? 'needs-review' : ''}">
+            <div class="log-header">
+              <div class="log-header-left">
+                <time class="log-timestamp">${formatTime(log.timestamp)}</time>
+                <div class="log-indicators">
+                  ${isPrivate ? '<span class="indicator indicator-private">Private</span>' : ''}
+                  ${versionCount > 0 ? `<span class="indicator indicator-edited" onclick="showHistory('${log.id}')">Edited (${versionCount})</span>` : ''}
+                </div>
               </div>
-            </td>
-            <td class="col-actions">
-              <div class="actions">
-                ${hasNeedsReview ? `<button class="btn btn-review" onclick="openReviewModal('${log.id}')">Review</button>` : ''}
-                <button class="btn" onclick="openAddTagModal('${log.id}')">+ Tag</button>
-                <button class="btn btn-edit" onclick="openEditModal('${log.id}')">Edit</button>
-              </div>
-            </td>
-          </tr>
+              <button class="edit-btn" onclick="openEditModal('${log.id}')">Edit</button>
+            </div>
+            <div class="log-body">
+              <div class="log-content ${isLong ? 'log-content-truncated' : ''}" id="content-${log.id}">${escapeHtml(log.content)}</div>
+              ${isLong ? `<button class="expand-toggle" onclick="toggleExpand('${log.id}')">Show more</button>` : ''}
+            </div>
+            <div class="log-footer">
+              ${hasNeedsReview ? `<button class="action-btn action-btn-review" onclick="openReviewModal('${log.id}')">Review</button>` : `<button class="action-btn" onclick="openAddTagModal('${log.id}')">+ Tag</button>`}
+              ${tags ? `<div class="log-tags">${tags}</div>` : ''}
+            </div>
+          </article>
         `;
       }).join('');
 
-      // Pagination
       const totalPages = Math.ceil(filteredLogs.length / pageSize);
       const pagination = document.getElementById('pagination');
       if (totalPages > 1) {
@@ -954,12 +1056,9 @@
 
     function toggleExpand(logId) {
       const content = document.getElementById(`content-${logId}`);
-      content.classList.toggle('content-truncated');
-      content.classList.toggle('content-expanded');
       const btn = content.nextElementSibling;
-      if (btn) {
-        btn.textContent = content.classList.contains('content-expanded') ? 'Show less' : 'Show more';
-      }
+      content.classList.toggle('log-content-truncated');
+      if (btn) btn.textContent = content.classList.contains('log-content-truncated') ? 'Show more' : 'Show less';
     }
 
     function filterByTag(tag) {
@@ -978,13 +1077,14 @@
       return div.innerHTML;
     }
 
-    // Modals
     function openModal(modalId) {
       document.getElementById(modalId).classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
 
     function closeModal(modalId) {
       document.getElementById(modalId).classList.remove('active');
+      document.body.style.overflow = '';
     }
 
     function getLogById(id) {
@@ -998,23 +1098,20 @@
     function openReviewModal(logId) {
       reviewLog = getLogById(logId);
       if (!reviewLog) return;
-
       document.getElementById('reviewLogTime').textContent = formatTime(reviewLog.timestamp);
       document.getElementById('reviewLogContent').textContent = reviewLog.content;
-
-      // Start with current tags minus 'needs review'
-      reviewTags = (reviewLog.tags || []).filter(t => t !== 'needs review');
+      // Filter out 'needs review' (will be removed on save) and 'private' (handled separately)
+      reviewTags = (reviewLog.tags || []).filter(t => t !== 'needs review' && t !== 'private');
       renderReviewTags();
-
       document.getElementById('reviewTagInput').value = '';
       openModal('reviewModal');
     }
 
     function renderReviewTags() {
       const container = document.getElementById('reviewSelectedTags');
-      container.innerHTML = reviewTags.map(tag =>
+      container.innerHTML = reviewTags.length ? reviewTags.map(tag =>
         `<span class="selected-tag">${escapeHtml(tag)}<button onclick="removeReviewTag('${escapeHtml(tag)}')">&times;</button></span>`
-      ).join('');
+      ).join('') : '<span style="color:#666;font-size:12px;">No tags yet</span>';
     }
 
     function removeReviewTag(tag) {
@@ -1043,14 +1140,23 @@
       showTagSuggestions(e.target.value, 'reviewTagSuggestions', addReviewTag);
     });
 
+    document.getElementById('reviewTagAddBtn').addEventListener('click', () => {
+      const input = document.getElementById('reviewTagInput');
+      addReviewTag(input.value);
+      input.value = '';
+      hideTagSuggestions('reviewTagSuggestions');
+    });
+
     document.getElementById('saveReviewBtn').addEventListener('click', async () => {
       if (!reviewLog) return;
-
       try {
+        // Preserve private tag if it was set
+        const wasPrivate = reviewLog.tags && reviewLog.tags.includes('private');
+        const tagsToSave = wasPrivate ? [...reviewTags, 'private'] : reviewTags;
         await fetch(`/logs/${reviewLog.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tags: reviewTags })
+          body: JSON.stringify({ tags: tagsToSave })
         });
         closeModal('reviewModal');
         await loadLogs();
@@ -1067,22 +1173,20 @@
     function openAddTagModal(logId) {
       addTagLog = getLogById(logId);
       if (!addTagLog) return;
-
       document.getElementById('addTagLogTime').textContent = formatTime(addTagLog.timestamp);
       document.getElementById('addTagLogContent').textContent = addTagLog.content;
-
-      addTagTags = [...(addTagLog.tags || [])];
+      // Filter out 'private' - handled separately
+      addTagTags = (addTagLog.tags || []).filter(t => t !== 'private');
       renderAddTagTags();
-
       document.getElementById('addTagInput').value = '';
       openModal('addTagModal');
     }
 
     function renderAddTagTags() {
       const container = document.getElementById('addTagCurrentTags');
-      container.innerHTML = addTagTags.map(tag =>
-        `<span class="selected-tag ${tag === 'needs review' ? 'needs-review' : ''}">${escapeHtml(tag)}<button onclick="removeAddTagTag('${escapeHtml(tag)}')">&times;</button></span>`
-      ).join('');
+      container.innerHTML = addTagTags.length ? addTagTags.map(tag =>
+        `<span class="selected-tag ${tag === 'needs review' ? 'tag-needs-review' : ''}">${escapeHtml(tag)}<button onclick="removeAddTagTag('${escapeHtml(tag)}')">&times;</button></span>`
+      ).join('') : '<span style="color:#666;font-size:12px;">No tags</span>';
     }
 
     function removeAddTagTag(tag) {
@@ -1111,14 +1215,23 @@
       showTagSuggestions(e.target.value, 'addTagSuggestions', addAddTagTag);
     });
 
+    document.getElementById('addTagAddBtn').addEventListener('click', () => {
+      const input = document.getElementById('addTagInput');
+      addAddTagTag(input.value);
+      input.value = '';
+      hideTagSuggestions('addTagSuggestions');
+    });
+
     document.getElementById('saveAddTagBtn').addEventListener('click', async () => {
       if (!addTagLog) return;
-
       try {
+        // Preserve private tag if it was set
+        const wasPrivate = addTagLog.tags && addTagLog.tags.includes('private');
+        const tagsToSave = wasPrivate ? [...addTagTags, 'private'] : addTagTags;
         await fetch(`/logs/${addTagLog.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tags: addTagTags })
+          body: JSON.stringify({ tags: tagsToSave })
         });
         closeModal('addTagModal');
         await loadLogs();
@@ -1135,22 +1248,21 @@
     function openEditModal(logId) {
       editLog = getLogById(logId);
       if (!editLog) return;
-
       document.getElementById('editContent').value = editLog.content;
-      document.getElementById('editPrivate').checked = editLog.private || false;
-
-      editTags = [...(editLog.tags || [])];
+      const isPrivate = editLog.tags && editLog.tags.includes('private');
+      document.getElementById('editPrivate').checked = isPrivate;
+      // Filter out 'private' from editable tags (handled by checkbox)
+      editTags = (editLog.tags || []).filter(t => t !== 'private');
       renderEditTags();
-
       document.getElementById('editTagInput').value = '';
       openModal('editModal');
     }
 
     function renderEditTags() {
       const container = document.getElementById('editSelectedTags');
-      container.innerHTML = editTags.map(tag =>
-        `<span class="selected-tag ${tag === 'needs review' ? 'needs-review' : ''}">${escapeHtml(tag)}<button onclick="removeEditTag('${escapeHtml(tag)}')">&times;</button></span>`
-      ).join('');
+      container.innerHTML = editTags.length ? editTags.map(tag =>
+        `<span class="selected-tag ${tag === 'needs review' ? 'tag-needs-review' : ''}">${escapeHtml(tag)}<button onclick="removeEditTag('${escapeHtml(tag)}')">&times;</button></span>`
+      ).join('') : '<span style="color:#666;font-size:12px;">No tags</span>';
     }
 
     function removeEditTag(tag) {
@@ -1179,26 +1291,23 @@
       showTagSuggestions(e.target.value, 'editTagSuggestions', addEditTag);
     });
 
+    document.getElementById('editTagAddBtn').addEventListener('click', () => {
+      const input = document.getElementById('editTagInput');
+      addEditTag(input.value);
+      input.value = '';
+      hideTagSuggestions('editTagSuggestions');
+    });
+
     document.getElementById('saveEditBtn').addEventListener('click', async () => {
       if (!editLog) return;
-
       const content = document.getElementById('editContent').value.trim();
       const isPrivate = document.getElementById('editPrivate').checked;
-
-      if (!content) {
-        alert('Content cannot be empty');
-        return;
-      }
-
+      if (!content) { alert('Content cannot be empty'); return; }
       try {
         await fetch(`/logs/${editLog.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content,
-            private: isPrivate,
-            tags: editTags
-          })
+          body: JSON.stringify({ content, private: isPrivate, tags: editTags })
         });
         closeModal('editModal');
         await loadLogs();
@@ -1208,25 +1317,21 @@
       }
     });
 
-    // Version History Modal
+    // Version History
     function showHistory(logId) {
       const log = getLogById(logId);
       if (!log) return;
-
       const versions = log.versions || [];
       const versionList = document.getElementById('versionList');
 
-      // Current version first
       let html = `
-        <div class="version-item version-current">
-          <div class="version-meta">${formatTime(log.editedAt || log.timestamp)}</div>
+        <div class="version-item current">
+          <div class="version-meta">${formatTime(log.editedAt || log.timestamp)}<span class="current-badge">Current</span></div>
           <div class="version-content">${escapeHtml(log.content)}</div>
         </div>
       `;
 
-      // Previous versions (newest first)
-      const sortedVersions = [...versions].reverse();
-      html += sortedVersions.map(v => `
+      html += [...versions].reverse().map(v => `
         <div class="version-item">
           <div class="version-meta">${formatTime(v.editedAt)}</div>
           <div class="version-content">${escapeHtml(v.content)}</div>
@@ -1241,21 +1346,9 @@
     function showTagSuggestions(value, suggestionsId, addCallback) {
       const suggestions = document.getElementById(suggestionsId);
       const trimmed = value.trim().toLowerCase();
-
-      if (!trimmed) {
-        suggestions.classList.remove('active');
-        return;
-      }
-
-      const matches = knownTags.filter(tag =>
-        tag.toLowerCase().includes(trimmed) && tag.toLowerCase() !== trimmed
-      );
-
-      if (matches.length === 0) {
-        suggestions.classList.remove('active');
-        return;
-      }
-
+      if (!trimmed) { suggestions.classList.remove('active'); return; }
+      const matches = knownTags.filter(tag => tag.toLowerCase().includes(trimmed) && tag.toLowerCase() !== trimmed);
+      if (matches.length === 0) { suggestions.classList.remove('active'); return; }
       suggestions.innerHTML = matches.slice(0, 5).map(tag =>
         `<div class="tag-suggestion" onclick="selectTagSuggestion('${escapeHtml(tag)}', '${suggestionsId}')">${escapeHtml(tag)}</div>`
       ).join('');
@@ -1267,46 +1360,37 @@
     }
 
     function selectTagSuggestion(tag, suggestionsId) {
-      // Determine which modal we're in and add the tag
-      if (suggestionsId === 'reviewTagSuggestions') {
-        addReviewTag(tag);
-        document.getElementById('reviewTagInput').value = '';
-      } else if (suggestionsId === 'addTagSuggestions') {
-        addAddTagTag(tag);
-        document.getElementById('addTagInput').value = '';
-      } else if (suggestionsId === 'editTagSuggestions') {
-        addEditTag(tag);
-        document.getElementById('editTagInput').value = '';
-      }
+      if (suggestionsId === 'reviewTagSuggestions') { addReviewTag(tag); document.getElementById('reviewTagInput').value = ''; }
+      else if (suggestionsId === 'addTagSuggestions') { addAddTagTag(tag); document.getElementById('addTagInput').value = ''; }
+      else if (suggestionsId === 'editTagSuggestions') { addEditTag(tag); document.getElementById('editTagInput').value = ''; }
       hideTagSuggestions(suggestionsId);
     }
 
-    // Close modals on outside click
+    // Close modals
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
       overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-          overlay.classList.remove('active');
-        }
+        if (e.target === overlay) { overlay.classList.remove('active'); document.body.style.overflow = ''; }
       });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(m => {
+          m.classList.remove('active'); document.body.style.overflow = '';
+        });
+      }
     });
 
     // Pagination
     document.getElementById('prevBtn').addEventListener('click', () => {
-      if (currentPage > 1) {
-        currentPage--;
-        renderTable();
-      }
+      if (currentPage > 1) { currentPage--; renderLogs(); }
     });
 
     document.getElementById('nextBtn').addEventListener('click', () => {
-      const totalPages = Math.ceil(filteredLogs.length / pageSize);
-      if (currentPage < totalPages) {
-        currentPage++;
-        renderTable();
-      }
+      if (currentPage < Math.ceil(filteredLogs.length / pageSize)) { currentPage++; renderLogs(); }
     });
 
-    // Event listeners for filters
+    // Filters
     searchInput.addEventListener('input', debounce(applyFilters, 300));
     tagFilter.addEventListener('change', applyFilters);
     privateFilter.addEventListener('change', applyFilters);
@@ -1314,13 +1398,9 @@
 
     function debounce(fn, delay) {
       let timeoutId;
-      return function(...args) {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => fn.apply(this, args), delay);
-      };
+      return (...args) => { clearTimeout(timeoutId); timeoutId = setTimeout(() => fn(...args), delay); };
     }
 
-    // Initialize
     loadLogs();
     loadTags();
   </script>

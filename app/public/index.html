@@ -17,6 +17,60 @@
       height: 100vh;
     }
 
+    .nav-link {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      z-index: 101;
+    }
+
+    .nav-link a {
+      color: #666;
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+
+    .nav-link a:hover {
+      color: #e0e0e0;
+    }
+
+    .needs-review-badge {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: rgba(234, 179, 8, 0.2);
+      color: #eab308;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      text-decoration: none;
+    }
+
+    .needs-review-badge.visible {
+      display: flex;
+    }
+
+    .needs-review-badge:hover {
+      background: rgba(234, 179, 8, 0.3);
+    }
+
+    .review-dot {
+      width: 5px;
+      height: 5px;
+      background: #eab308;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
     .input-container {
       position: fixed;
       left: 50%;
@@ -154,64 +208,17 @@
       line-height: 1.5;
     }
 
-    .log-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 10px;
-    }
-
-    .tag {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-size: 11px;
-      background: rgba(255, 255, 255, 0.08);
-      color: #888;
-    }
-
-    .tag.needs-review {
-      background: rgba(234, 179, 8, 0.2);
-      color: #eab308;
-    }
-
-    .nav-link {
-      position: fixed;
-      top: 16px;
-      right: 20px;
-      display: flex;
-      gap: 16px;
-      z-index: 101;
-    }
-
-    .nav-link a {
-      color: #666;
-      text-decoration: none;
-      font-size: 13px;
-      transition: color 0.2s;
-    }
-
-    .nav-link a:hover {
-      color: #e0e0e0;
-    }
-
-    .needs-review-badge {
-      background: rgba(234, 179, 8, 0.2);
-      color: #eab308;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-    }
-
     #logs.hidden {
       visibility: hidden;
     }
-
   </style>
 </head>
 <body>
   <div class="nav-link">
-    <span class="needs-review-badge" id="needsReviewBadge" style="display: none;">0 need review</span>
+    <a href="/logs-table" class="needs-review-badge" id="reviewBadge">
+      <span class="review-dot"></span>
+      <span id="reviewCount">0</span>
+    </a>
     <a href="/logs-table">Logs Table</a>
     <a href="/chat">Chat</a>
   </div>
@@ -248,28 +255,29 @@
         const logs = await res.json();
         const showPrivate = showPrivateCheckbox.checked;
         const filtered = logs
-          .filter(log => showPrivate || !log.private)
+          .filter(log => {
+            const isPrivate = log.tags && log.tags.includes('private');
+            return showPrivate || !isPrivate;
+          })
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
         // Update needs review badge
         const needsReviewCount = logs.filter(log => log.tags && log.tags.includes('needs review')).length;
-        const badge = document.getElementById('needsReviewBadge');
+        const badge = document.getElementById('reviewBadge');
+        const countEl = document.getElementById('reviewCount');
         if (needsReviewCount > 0) {
-          badge.textContent = `${needsReviewCount} need review`;
-          badge.style.display = 'inline-block';
+          countEl.textContent = needsReviewCount + ' need review';
+          badge.classList.add('visible');
         } else {
-          badge.style.display = 'none';
+          badge.classList.remove('visible');
         }
 
         logsDiv.innerHTML = filtered.map((log, i) => {
-          const tags = (log.tags || []).map(tag =>
-            `<span class="tag ${tag === 'needs review' ? 'needs-review' : ''}">${escapeHtml(tag)}</span>`
-          ).join('');
+          const isPrivate = log.tags && log.tags.includes('private');
           return `
-            <div class="log ${animate ? '' : 'instant'}${log.private ? ' private' : ''}" data-index="${i}">
-              <div class="log-time">${formatTime(log.timestamp)}${log.private ? ' · private' : ''}</div>
+            <div class="log ${animate ? '' : 'instant'}${isPrivate ? ' private' : ''}" data-index="${i}">
+              <div class="log-time">${formatTime(log.timestamp)}${isPrivate ? ' · private' : ''}</div>
               <div class="log-content">${escapeHtml(log.content)}</div>
-              ${tags ? `<div class="log-tags">${tags}</div>` : ''}
             </div>
           `;
         }).join('');
@@ -329,7 +337,6 @@
     let lastProgress = -1;
     const root = document.documentElement;
 
-    // Cache viewport height (update on resize)
     let vh = window.innerHeight;
     let maxScroll = vh * 0.6;
     let startTop = vh * 0.5 - 120;
@@ -349,17 +356,15 @@
       const scrollY = window.scrollY;
       const progress = Math.min(scrollY / maxScroll, 1);
 
-      // Skip if progress hasn't meaningfully changed (reduces redundant paints)
       if (Math.abs(progress - lastProgress) < 0.001) {
         ticking = false;
         return;
       }
       lastProgress = progress;
 
-      // Batch all CSS custom property updates in one go (all GPU-accelerated)
       const containerY = lerp(startTop, endTop, progress);
       const hintOpacity = Math.max(0, 1 - progress * 3);
-      const hintY = -50 * progress; // move up as we scroll
+      const hintY = -50 * progress;
 
       root.style.cssText = `
         --container-y: ${containerY}px;
@@ -367,7 +372,6 @@
         --hint-y: ${hintY}px;
       `;
 
-      // Show/hide logs (only when crossing thresholds)
       if (progress > 0.3 && !hasRevealed) {
         hasRevealed = true;
         logsDiv.classList.remove('hidden');
@@ -396,7 +400,6 @@
 
     updatePosition();
     loadLogs(true);
-
   </script>
 </body>
 </html>
